@@ -27,7 +27,7 @@ def get_response_json(file: str) -> dict:
 
 def init_mocked_api(mocked_api: MockRouter) -> None:
     mocked_api.get(
-        url="https://api.github.com/repos/HibiKier/zhenxun_bot/releases/latest",
+        url="https://api.github.com/repos/HibiKier/bocchi_bot/releases/latest",
         name="release_latest",
     ).respond(json=get_response_json("release_latest.json"))
 
@@ -45,27 +45,27 @@ def init_mocked_api(mocked_api: MockRouter) -> None:
     ).respond(text="")
 
     mocked_api.get(
-        url="https://raw.githubusercontent.com/HibiKier/zhenxun_bot/dev/__version__",
+        url="https://raw.githubusercontent.com/HibiKier/bocchi_bot/dev/__version__",
         name="dev_branch_version",
     ).respond(text="__version__: v0.2.2-e6f17c4")
     mocked_api.get(
-        url="https://raw.githubusercontent.com/HibiKier/zhenxun_bot/main/__version__",
+        url="https://raw.githubusercontent.com/HibiKier/bocchi_bot/main/__version__",
         name="main_branch_version",
     ).respond(text="__version__: v0.2.2-e6f17c4")
     mocked_api.get(
-        url="https://api.github.com/repos/HibiKier/zhenxun_bot/tarball/v0.2.2",
+        url="https://api.github.com/repos/HibiKier/bocchi_bot/tarball/v0.2.2",
         name="release_download_url",
     ).respond(
         status_code=302,
         headers={
-            "Location": "https://codeload.github.com/HibiKier/zhenxun_bot/legacy.tar.gz/refs/tags/v0.2.2"
+            "Location": "https://codeload.github.com/HibiKier/bocchi_bot/legacy.tar.gz/refs/tags/v0.2.2"
         },
     )
 
     tar_buffer = io.BytesIO()
     zip_bytes = io.BytesIO()
 
-    from zhenxun.builtin_plugins.auto_update.config import (
+    from bocchi.builtin_plugins.auto_update.config import (
         PYPROJECT_FILE_STRING,
         PYPROJECT_LOCK_FILE_STRING,
         REPLACE_FOLDERS,
@@ -87,19 +87,19 @@ def init_mocked_api(mocked_api: MockRouter) -> None:
         add_files_and_folders_to_zip(zipf, file_paths, folders=REPLACE_FOLDERS)
 
     mocked_api.get(
-        url="https://codeload.github.com/HibiKier/zhenxun_bot/legacy.tar.gz/refs/tags/v0.2.2",
+        url="https://codeload.github.com/HibiKier/bocchi_bot/legacy.tar.gz/refs/tags/v0.2.2",
         name="release_download_url_redirect",
     ).respond(
         content=tar_buffer.getvalue(),
     )
     mocked_api.get(
-        url="https://github.com/HibiKier/zhenxun_bot/archive/refs/heads/dev.zip",
+        url="https://github.com/HibiKier/bocchi_bot/archive/refs/heads/dev.zip",
         name="dev_download_url",
     ).respond(
         content=zip_bytes.getvalue(),
     )
     mocked_api.get(
-        url="https://github.com/HibiKier/zhenxun_bot/archive/refs/heads/main.zip",
+        url="https://github.com/HibiKier/bocchi_bot/archive/refs/heads/main.zip",
         name="main_download_url",
     ).respond(
         content=zip_bytes.getvalue(),
@@ -132,7 +132,7 @@ def add_files_and_folders_to_zip(
     for file_path in file_paths:
         # 将文件添加到 ZIP 中，路径为 folder_name + file_name
         zipf.writestr(f"{folder_name}{os.path.basename(file_path)}", b"new")
-    base_folder = f"{folder_name}zhenxun/"
+    base_folder = f"{folder_name}bocchi/"
     zipf.writestr(base_folder, "")
 
     for folder in folders:
@@ -172,7 +172,7 @@ def add_files_and_folders_to_tar(
         # 添加文件
         tar.addfile(tarinfo, fileobj=tar_buffer)
 
-    base_folder = f"{folder_name}/zhenxun"
+    base_folder = f"{folder_name}/bocchi"
     tarinfo = tarfile.TarInfo(base_folder)
     add_directory_to_tar(tarinfo, tar)
     for folder in folders:
@@ -199,7 +199,7 @@ def add_directory_to_tar(tarinfo, tar):
 
 
 def init_mocker_path(mocker: MockerFixture, tmp_path: Path):
-    from zhenxun.builtin_plugins.auto_update.config import (
+    from bocchi.builtin_plugins.auto_update.config import (
         PYPROJECT_FILE_STRING,
         PYPROJECT_LOCK_FILE_STRING,
         REQ_TXT_FILE_STRING,
@@ -207,43 +207,43 @@ def init_mocker_path(mocker: MockerFixture, tmp_path: Path):
     )
 
     mocker.patch(
-        "zhenxun.builtin_plugins.auto_update._data_source.install_requirement",
+        "bocchi.builtin_plugins.auto_update._data_source.install_requirement",
         return_value=None,
     )
     mock_tmp_path = mocker.patch(
-        "zhenxun.builtin_plugins.auto_update._data_source.TMP_PATH",
+        "bocchi.builtin_plugins.auto_update._data_source.TMP_PATH",
         new=tmp_path / "auto_update",
     )
     mock_base_path = mocker.patch(
-        "zhenxun.builtin_plugins.auto_update._data_source.BASE_PATH",
-        new=tmp_path / "zhenxun",
+        "bocchi.builtin_plugins.auto_update._data_source.BASE_PATH",
+        new=tmp_path / "bocchi",
     )
     mock_backup_path = mocker.patch(
-        "zhenxun.builtin_plugins.auto_update._data_source.BACKUP_PATH",
+        "bocchi.builtin_plugins.auto_update._data_source.BACKUP_PATH",
         new=tmp_path / "backup",
     )
     mock_download_gz_file = mocker.patch(
-        "zhenxun.builtin_plugins.auto_update._data_source.DOWNLOAD_GZ_FILE",
+        "bocchi.builtin_plugins.auto_update._data_source.DOWNLOAD_GZ_FILE",
         new=mock_tmp_path / "download_latest_file.tar.gz",
     )
     mock_download_zip_file = mocker.patch(
-        "zhenxun.builtin_plugins.auto_update._data_source.DOWNLOAD_ZIP_FILE",
+        "bocchi.builtin_plugins.auto_update._data_source.DOWNLOAD_ZIP_FILE",
         new=mock_tmp_path / "download_latest_file.zip",
     )
     mock_pyproject_file = mocker.patch(
-        "zhenxun.builtin_plugins.auto_update._data_source.PYPROJECT_FILE",
+        "bocchi.builtin_plugins.auto_update._data_source.PYPROJECT_FILE",
         new=tmp_path / PYPROJECT_FILE_STRING,
     )
     mock_pyproject_lock_file = mocker.patch(
-        "zhenxun.builtin_plugins.auto_update._data_source.PYPROJECT_LOCK_FILE",
+        "bocchi.builtin_plugins.auto_update._data_source.PYPROJECT_LOCK_FILE",
         new=tmp_path / PYPROJECT_LOCK_FILE_STRING,
     )
     mock_req_txt_file = mocker.patch(
-        "zhenxun.builtin_plugins.auto_update._data_source.REQ_TXT_FILE",
+        "bocchi.builtin_plugins.auto_update._data_source.REQ_TXT_FILE",
         new=tmp_path / REQ_TXT_FILE_STRING,
     )
     mock_version_file = mocker.patch(
-        "zhenxun.builtin_plugins.auto_update._data_source.VERSION_FILE",
+        "bocchi.builtin_plugins.auto_update._data_source.VERSION_FILE",
         new=tmp_path / VERSION_FILE_STRING,
     )
     open(mock_version_file, "w").write("__version__: v0.2.2")
@@ -270,8 +270,8 @@ async def test_check_update_release(
     """
     测试检查更新（release）
     """
-    from zhenxun.builtin_plugins.auto_update import _matcher
-    from zhenxun.builtin_plugins.auto_update.config import (
+    from bocchi.builtin_plugins.auto_update import _matcher
+    from bocchi.builtin_plugins.auto_update.config import (
         PYPROJECT_FILE_STRING,
         PYPROJECT_LOCK_FILE_STRING,
         REPLACE_FOLDERS,
@@ -367,8 +367,8 @@ async def test_check_update_main(
     """
     测试检查更新（正式环境）
     """
-    from zhenxun.builtin_plugins.auto_update import _matcher
-    from zhenxun.builtin_plugins.auto_update.config import (
+    from bocchi.builtin_plugins.auto_update import _matcher
+    from bocchi.builtin_plugins.auto_update.config import (
         PYPROJECT_FILE_STRING,
         PYPROJECT_LOCK_FILE_STRING,
         REPLACE_FOLDERS,

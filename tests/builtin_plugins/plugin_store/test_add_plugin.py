@@ -29,24 +29,24 @@ async def test_add_plugin_basic(
     """
     测试添加基础插件
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     mock_base_path = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.BASE_PATH",
-        new=tmp_path / "zhenxun",
+        "bocchi.builtin_plugins.plugin_store.data_source.BASE_PATH",
+        new=tmp_path / "bocchi",
     )
 
     if package_api != "jsd":
-        mocked_api["zhenxun_bot_plugins_metadata"].respond(404)
+        mocked_api["bocchi_bot_plugins_metadata"].respond(404)
     if package_api != "gh":
-        mocked_api["zhenxun_bot_plugins_tree"].respond(404)
+        mocked_api["bocchi_bot_plugins_tree"].respond(404)
 
     if not is_commit:
-        mocked_api["zhenxun_bot_plugins_commit"].respond(404)
-        mocked_api["zhenxun_bot_plugins_commit_proxy"].respond(404)
-        mocked_api["zhenxun_bot_plugins_index_commit"].respond(404)
-        mocked_api["zhenxun_bot_plugins_index_commit_proxy"].respond(404)
+        mocked_api["bocchi_bot_plugins_commit"].respond(404)
+        mocked_api["bocchi_bot_plugins_commit_proxy"].respond(404)
+        mocked_api["bocchi_bot_plugins_index_commit"].respond(404)
+        mocked_api["bocchi_bot_plugins_index_commit_proxy"].respond(404)
 
     plugin_id = 1
 
@@ -100,24 +100,24 @@ async def test_add_plugin_basic_commit_version(
     """
     测试添加基础插件
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     mock_base_path = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.BASE_PATH",
-        new=tmp_path / "zhenxun",
+        "bocchi.builtin_plugins.plugin_store.data_source.BASE_PATH",
+        new=tmp_path / "bocchi",
     )
 
     if package_api != "jsd":
-        mocked_api["zhenxun_bot_plugins_metadata_commit"].respond(404)
+        mocked_api["bocchi_bot_plugins_metadata_commit"].respond(404)
     if package_api != "gh":
-        mocked_api["zhenxun_bot_plugins_tree_commit"].respond(404)
+        mocked_api["bocchi_bot_plugins_tree_commit"].respond(404)
 
     if not is_commit:
-        mocked_api["zhenxun_bot_plugins_commit"].respond(404)
-        mocked_api["zhenxun_bot_plugins_commit_proxy"].respond(404)
-        mocked_api["zhenxun_bot_plugins_index_commit"].respond(404)
-        mocked_api["zhenxun_bot_plugins_index_commit_proxy"].respond(404)
+        mocked_api["bocchi_bot_plugins_commit"].respond(404)
+        mocked_api["bocchi_bot_plugins_commit_proxy"].respond(404)
+        mocked_api["bocchi_bot_plugins_index_commit"].respond(404)
+        mocked_api["bocchi_bot_plugins_index_commit_proxy"].respond(404)
     plugin_id = 3
 
     async with app.test_matcher(_matcher) as ctx:
@@ -146,9 +146,9 @@ async def test_add_plugin_basic_commit_version(
             bot=bot,
         )
     if package_api == "jsd":
-        assert mocked_api["zhenxun_bot_plugins_metadata_commit"].called
+        assert mocked_api["bocchi_bot_plugins_metadata_commit"].called
     if package_api == "gh":
-        assert mocked_api["zhenxun_bot_plugins_tree_commit"].called
+        assert mocked_api["bocchi_bot_plugins_tree_commit"].called
     if is_commit:
         assert mocked_api["basic_plugins"].called
         assert mocked_api["extra_plugins"].called
@@ -173,24 +173,24 @@ async def test_add_plugin_basic_is_not_dir(
     """
     测试添加基础插件，插件不是目录
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     mock_base_path = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.BASE_PATH",
-        new=tmp_path / "zhenxun",
+        "bocchi.builtin_plugins.plugin_store.data_source.BASE_PATH",
+        new=tmp_path / "bocchi",
     )
 
     if package_api != "jsd":
-        mocked_api["zhenxun_bot_plugins_metadata"].respond(404)
+        mocked_api["bocchi_bot_plugins_metadata"].respond(404)
     if package_api != "gh":
-        mocked_api["zhenxun_bot_plugins_tree"].respond(404)
+        mocked_api["bocchi_bot_plugins_tree"].respond(404)
 
     if not is_commit:
-        mocked_api["zhenxun_bot_plugins_commit"].respond(404)
-        mocked_api["zhenxun_bot_plugins_commit_proxy"].respond(404)
-        mocked_api["zhenxun_bot_plugins_index_commit"].respond(404)
-        mocked_api["zhenxun_bot_plugins_index_commit_proxy"].respond(404)
+        mocked_api["bocchi_bot_plugins_commit"].respond(404)
+        mocked_api["bocchi_bot_plugins_commit_proxy"].respond(404)
+        mocked_api["bocchi_bot_plugins_index_commit"].respond(404)
+        mocked_api["bocchi_bot_plugins_index_commit_proxy"].respond(404)
 
     plugin_id = 0
 
@@ -244,26 +244,26 @@ async def test_add_plugin_extra(
     """
     测试添加额外插件
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     mock_base_path = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.BASE_PATH",
-        new=tmp_path / "zhenxun",
+        "bocchi.builtin_plugins.plugin_store.data_source.BASE_PATH",
+        new=tmp_path / "bocchi",
     )
 
     if package_api != "jsd":
-        mocked_api["zhenxun_github_sub_metadata"].respond(404)
+        mocked_api["bocchi_github_sub_metadata"].respond(404)
     if package_api != "gh":
-        mocked_api["zhenxun_github_sub_tree"].respond(404)
+        mocked_api["bocchi_github_sub_tree"].respond(404)
 
     if not is_commit:
-        mocked_api["zhenxun_github_sub_commit"].respond(404)
-        mocked_api["zhenxun_github_sub_commit_proxy"].respond(404)
-        mocked_api["zhenxun_bot_plugins_commit"].respond(404)
-        mocked_api["zhenxun_bot_plugins_commit_proxy"].respond(404)
-        mocked_api["zhenxun_bot_plugins_index_commit"].respond(404)
-        mocked_api["zhenxun_bot_plugins_index_commit_proxy"].respond(404)
+        mocked_api["bocchi_github_sub_commit"].respond(404)
+        mocked_api["bocchi_github_sub_commit_proxy"].respond(404)
+        mocked_api["bocchi_bot_plugins_commit"].respond(404)
+        mocked_api["bocchi_bot_plugins_commit_proxy"].respond(404)
+        mocked_api["bocchi_bot_plugins_index_commit"].respond(404)
+        mocked_api["bocchi_bot_plugins_index_commit_proxy"].respond(404)
 
     plugin_id = 4
 
@@ -313,7 +313,7 @@ async def test_plugin_not_exist_add(
     """
     测试插件不存在，添加插件
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     plugin_id = -1
@@ -355,11 +355,11 @@ async def test_add_plugin_exist(
     """
     测试插件已经存在，添加插件
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.StoreManager.get_loaded_plugins",
+        "bocchi.builtin_plugins.plugin_store.data_source.StoreManager.get_loaded_plugins",
         return_value=[("search_image", "0.1")],
     )
     plugin_id = 1

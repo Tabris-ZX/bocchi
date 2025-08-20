@@ -61,8 +61,8 @@ def _init_bot(nonebug_init: None):
     nonebot.load_plugin("nonebot_plugin_alconna")
     nonebot.load_plugin("nonebot_plugin_apscheduler")
     nonebot.load_plugin("nonebot_plugin_htmlrender")
-    nonebot.load_plugins("zhenxun/builtin_plugins")
-    nonebot.load_plugins("zhenxun/plugins")
+    nonebot.load_plugins("bocchi/builtin_plugins")
+    nonebot.load_plugins("bocchi/plugins")
 
     # 手动缓存 uninfo 所需信息
     from nonebot_plugin_uninfo import (
@@ -98,7 +98,7 @@ def _init_bot(nonebug_init: None):
 
 @pytest.fixture
 async def app(app: App, tmp_path: Path, mocker: MockerFixture):
-    from zhenxun.services.db_context import disconnect, init
+    from bocchi.services.db_context import disconnect, init
 
     driver = nonebot.get_driver()
     # 清除连接钩子，现在 NoneBug 会自动触发 on_bot_connect
@@ -111,7 +111,7 @@ async def app(app: App, tmp_path: Path, mocker: MockerFixture):
     mock_config_path.TEMP_PATH = tmp_path / "resources" / "temp"
     # mock_config_path.TEMP_PATH.mkdir(parents=True, exist_ok=True)
 
-    mocker.patch("zhenxun.configs.path_config", new=mock_config_path)
+    mocker.patch("bocchi.configs.path_config", new=mock_config_path)
 
     await init()
     # await driver._lifespan.startup()

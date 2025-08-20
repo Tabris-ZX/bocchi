@@ -23,19 +23,19 @@ async def test_plugin_store(
     """
     测试插件商店
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
-    from zhenxun.builtin_plugins.plugin_store.data_source import row_style
+    from bocchi.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store.data_source import row_style
 
     init_mocked_api(mocked_api=mocked_api)
 
     mock_table_page = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.ImageTemplate.table_page"
+        "bocchi.builtin_plugins.plugin_store.data_source.ImageTemplate.table_page"
     )
     mock_table_page_return = mocker.AsyncMock()
     mock_table_page.return_value = mock_table_page_return
 
     mock_build_message = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.MessageUtils.build_message"
+        "bocchi.builtin_plugins.plugin_store.MessageUtils.build_message"
     )
     mock_build_message_return = mocker.AsyncMock()
     mock_build_message.return_value = mock_build_message_return
@@ -108,11 +108,11 @@ async def test_plugin_store_fail(
     """
     测试插件商店
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     mocked_api.get(
-        "https://raw.githubusercontent.com/zhenxun-org/zhenxun_bot_plugins/b101fbc/plugins.json",
+        "https://raw.githubusercontent.com/bocchi-org/bocchi_bot_plugins/b101fbc/plugins.json",
         name="basic_plugins",
     ).respond(404)
 

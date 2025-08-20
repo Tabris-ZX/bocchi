@@ -26,12 +26,12 @@ async def test_remove_plugin(
     """
     测试删除插件
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     mock_base_path = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.BASE_PATH",
-        new=tmp_path / "zhenxun",
+        "bocchi.builtin_plugins.plugin_store.data_source.BASE_PATH",
+        new=tmp_path / "bocchi",
     )
 
     plugin_path = mock_base_path / "plugins" / "search_image"
@@ -76,7 +76,7 @@ async def test_plugin_not_exist_remove(
     """
     测试插件不存在，移除插件
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     plugin_id = -1
@@ -112,12 +112,12 @@ async def test_remove_plugin_not_install(
     """
     测试插件未安装，移除插件
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     _ = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.BASE_PATH",
-        new=tmp_path / "zhenxun",
+        "bocchi.builtin_plugins.plugin_store.data_source.BASE_PATH",
+        new=tmp_path / "bocchi",
     )
     plugin_id = 1
 

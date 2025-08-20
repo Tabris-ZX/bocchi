@@ -24,19 +24,19 @@ async def test_search_plugin_name(
     """
     测试搜索插件
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
-    from zhenxun.builtin_plugins.plugin_store.data_source import row_style
+    from bocchi.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store.data_source import row_style
 
     init_mocked_api(mocked_api=mocked_api)
 
     mock_table_page = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.ImageTemplate.table_page"
+        "bocchi.builtin_plugins.plugin_store.data_source.ImageTemplate.table_page"
     )
     mock_table_page_return = mocker.AsyncMock()
     mock_table_page.return_value = mock_table_page_return
 
     mock_build_message = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.MessageUtils.build_message"
+        "bocchi.builtin_plugins.plugin_store.MessageUtils.build_message"
     )
     mock_build_message_return = mocker.AsyncMock()
     mock_build_message.return_value = mock_build_message_return
@@ -90,19 +90,19 @@ async def test_search_plugin_author(
     """
     测试搜索插件，作者
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
-    from zhenxun.builtin_plugins.plugin_store.data_source import row_style
+    from bocchi.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store.data_source import row_style
 
     init_mocked_api(mocked_api=mocked_api)
 
     mock_table_page = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.ImageTemplate.table_page"
+        "bocchi.builtin_plugins.plugin_store.data_source.ImageTemplate.table_page"
     )
     mock_table_page_return = mocker.AsyncMock()
     mock_table_page.return_value = mock_table_page_return
 
     mock_build_message = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.MessageUtils.build_message"
+        "bocchi.builtin_plugins.plugin_store.MessageUtils.build_message"
     )
     mock_build_message_return = mocker.AsyncMock()
     mock_build_message.return_value = mock_build_message_return
@@ -156,7 +156,7 @@ async def test_plugin_not_exist_search(
     """
     测试插件不存在，搜索插件
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     plugin_name = "not_exist_plugin_name"

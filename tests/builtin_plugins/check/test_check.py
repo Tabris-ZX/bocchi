@@ -16,7 +16,7 @@ from tests.utils import _v11_group_message_event
 
 platform_uname = platform.uname_result(
     system="Linux",
-    node="zhenxun",
+    node="bocchi",
     release="5.15.0-1027-azure",
     version="#1 SMP Debian 5.15.0-1027-azure",
     machine="x86_64",
@@ -25,7 +25,7 @@ cpuinfo_get_cpu_info = {"brand_raw": "Intel(R) Core(TM) i7-10700K"}
 
 
 def init_mocker(mocker: MockerFixture, tmp_path: Path):
-    mock_psutil = mocker.patch("zhenxun.builtin_plugins.check.data_source.psutil")
+    mock_psutil = mocker.patch("bocchi.builtin_plugins.check.data_source.psutil")
 
     # Define namedtuples for complex return values
     CpuFreqs = namedtuple("CpuFreqs", ["current"])  # noqa: PYI024
@@ -60,25 +60,25 @@ def init_mocker(mocker: MockerFixture, tmp_path: Path):
         percent=100.0,  # 100% of disk space used
     )
 
-    mock_cpuinfo = mocker.patch("zhenxun.builtin_plugins.check.data_source.cpuinfo")
+    mock_cpuinfo = mocker.patch("bocchi.builtin_plugins.check.data_source.cpuinfo")
     mock_cpuinfo.get_cpu_info.return_value = cpuinfo_get_cpu_info
 
-    mock_platform = mocker.patch("zhenxun.builtin_plugins.check.data_source.platform")
+    mock_platform = mocker.patch("bocchi.builtin_plugins.check.data_source.platform")
     mock_platform.uname.return_value = platform_uname
 
-    mock_template_to_pic = mocker.patch("zhenxun.builtin_plugins.check.template_to_pic")
+    mock_template_to_pic = mocker.patch("bocchi.builtin_plugins.check.template_to_pic")
     mock_template_to_pic_return = mocker.AsyncMock()
     mock_template_to_pic.return_value = mock_template_to_pic_return
 
     mock_build_message = mocker.patch(
-        "zhenxun.builtin_plugins.check.MessageUtils.build_message"
+        "bocchi.builtin_plugins.check.MessageUtils.build_message"
     )
     mock_build_message_return = mocker.AsyncMock()
     mock_build_message.return_value = mock_build_message_return
 
     mock_template_path_new = tmp_path / "resources" / "template"
     mocker.patch(
-        "zhenxun.builtin_plugins.check.TEMPLATE_PATH", new=mock_template_path_new
+        "bocchi.builtin_plugins.check.TEMPLATE_PATH", new=mock_template_path_new
     )
     return (
         mock_psutil,
@@ -102,9 +102,9 @@ async def test_check(
     """
     测试自检
     """
-    from zhenxun.builtin_plugins.check import _self_check_matcher
-    from zhenxun.builtin_plugins.check.data_source import __get_version
-    from zhenxun.configs.config import BotConfig
+    from bocchi.builtin_plugins.check import _self_check_matcher
+    from bocchi.builtin_plugins.check.data_source import __get_version
+    from bocchi.configs.config import BotConfig
 
     (
         mock_psutil,
@@ -180,22 +180,22 @@ async def test_check_arm(
     """
     测试自检（arm）
     """
-    from zhenxun.builtin_plugins.check import _self_check_matcher
-    from zhenxun.builtin_plugins.check.data_source import __get_version
-    from zhenxun.configs.config import BotConfig
+    from bocchi.builtin_plugins.check import _self_check_matcher
+    from bocchi.builtin_plugins.check.data_source import __get_version
+    from bocchi.configs.config import BotConfig
 
     platform_uname_arm = platform.uname_result(
         system="Linux",
-        node="zhenxun",
+        node="bocchi",
         release="5.15.0-1017-oracle",
         version="#22~20.04.1-Ubuntu SMP Wed Aug 24 11:13:15 UTC 2022",
         machine="aarch64",
     )  # type: ignore
     mock_subprocess_check_output = mocker.patch(
-        "zhenxun.builtin_plugins.check.data_source.subprocess.check_output"
+        "bocchi.builtin_plugins.check.data_source.subprocess.check_output"
     )
     mock_environ_copy = mocker.patch(
-        "zhenxun.builtin_plugins.check.data_source.os.environ.copy"
+        "bocchi.builtin_plugins.check.data_source.os.environ.copy"
     )
     mock_environ_copy_return = mocker.MagicMock()
     mock_environ_copy.return_value = mock_environ_copy_return

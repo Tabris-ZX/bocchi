@@ -8,7 +8,7 @@ from nonebot.log import logger
 
 nonebot.init()
 
-from zhenxun.services.db_context import disconnect, init
+from bocchi.services.db_context import disconnect, init
 
 driver = nonebot.get_driver()
 
@@ -20,13 +20,13 @@ driver.on_shutdown(disconnect)
 
 
 # nonebot.load_builtin_plugins("echo")
-nonebot.load_plugins("zhenxun/builtin_plugins")
-nonebot.load_plugins("zhenxun/plugins")
+nonebot.load_plugins("bocchi/builtin_plugins")
+nonebot.load_plugins("bocchi/plugins")
 
 all_plugins = [name.replace(":", ".") for name in nonebot.get_available_plugin_names()]
 logger.info(f"所有插件：{all_plugins}")
 loaded_plugins = tuple(
-    re.sub(r"^zhenxun\.(plugins|builtin_plugins)\.", "", plugin.module_name)
+    re.sub(r"^bocchi\.(plugins|builtin_plugins)\.", "", plugin.module_name)
     for plugin in nonebot.get_loaded_plugins()
 )
 logger.info(f"已加载插件：{loaded_plugins}")

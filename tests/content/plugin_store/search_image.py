@@ -1,6 +1,6 @@
 from nonebot.plugin import PluginMetadata
 
-from zhenxun.configs.utils import PluginExtraData
+from bocchi.configs.utils import PluginExtraData
 
 __plugin_meta__ = PluginMetadata(
     name="识图",

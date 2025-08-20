@@ -24,15 +24,15 @@ async def test_update_all_plugin_basic_need_update(
     """
     测试更新基础插件，插件需要更新
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     mock_base_path = mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.BASE_PATH",
-        new=tmp_path / "zhenxun",
+        "bocchi.builtin_plugins.plugin_store.data_source.BASE_PATH",
+        new=tmp_path / "bocchi",
     )
     mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.StoreManager.get_loaded_plugins",
+        "bocchi.builtin_plugins.plugin_store.data_source.StoreManager.get_loaded_plugins",
         return_value=[("search_image", "0.0")],
     )
 
@@ -79,15 +79,15 @@ async def test_update_all_plugin_basic_is_new(
     """
     测试更新基础插件，插件是最新版
     """
-    from zhenxun.builtin_plugins.plugin_store import _matcher
+    from bocchi.builtin_plugins.plugin_store import _matcher
 
     init_mocked_api(mocked_api=mocked_api)
     mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.BASE_PATH",
-        new=tmp_path / "zhenxun",
+        "bocchi.builtin_plugins.plugin_store.data_source.BASE_PATH",
+        new=tmp_path / "bocchi",
     )
     mocker.patch(
-        "zhenxun.builtin_plugins.plugin_store.data_source.StoreManager.get_loaded_plugins",
+        "bocchi.builtin_plugins.plugin_store.data_source.StoreManager.get_loaded_plugins",
         return_value=[("search_image", "0.1")],
     )
 
