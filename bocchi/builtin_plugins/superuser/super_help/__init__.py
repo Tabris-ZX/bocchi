@@ -12,7 +12,7 @@ from bocchi.utils.message import MessageUtils
 
 from .config import SUPERUSER_HELP_IMAGE
 from .normal_help import build_help
-from .zhenxun_help import build_html_help
+from .bocchi_help import build_html_help
 
 __plugin_meta__ = PluginMetadata(
     name="超级用户帮助",

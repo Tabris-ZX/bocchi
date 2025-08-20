@@ -29,7 +29,7 @@ from ._config import (
 )
 from .html_help import build_html_image
 from .normal_help import build_normal_image
-from .zhenxun_help import build_bocchi_image
+from .bocchi_help import build_bocchi_image
 
 random_bk_path = IMAGE_PATH / "background" / "help" / "simple_help"
 
@@ -142,7 +142,7 @@ def split_text(text: str):
     return [s.replace(" ", "&nbsp;") for s in split_text]
 
 
-async def get_zhenxun_help(
+async def get_bocchi_help(
     module: str, metadata: PluginMetadata, extra: PluginExtraData, is_superuser: bool
 ) -> str | bytes:
     """构建bocchi帮助详情
@@ -201,7 +201,7 @@ async def get_plugin_help(user_id: str, name: str, is_superuser: bool) -> str | 
         if _plugin and _plugin.metadata:
             extra_data = PluginExtraData(**_plugin.metadata.extra)
             if Config.get_config("help", "detail_type") == "bocchi":
-                return await get_zhenxun_help(
+                return await get_bocchi_help(
                     plugin.module, _plugin.metadata, extra_data, is_superuser
                 )
             else:

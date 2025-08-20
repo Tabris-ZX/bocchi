@@ -1,13 +1,13 @@
 
 ---
 
-# 🚀 Zhenxun LLM 服务模块
+# 🚀 bocchi LLM 服务模块
 
 本模块是一个功能强大、高度可扩展的统一大语言模型（LLM）服务框架。它旨在将各种不同的 LLM 提供商（如 OpenAI、Gemini、智谱AI等）的 API 封装在一个统一、易于使用的接口之后，让开发者可以无缝切换和使用不同的模型，同时支持多模态输入、工具调用、智能重试和缓存等高级功能。
 
 ## 目录
 
-- [🚀 Zhenxun LLM 服务模块](#-zhenxun-llm-服务模块)
+- [🚀 bocchi LLM 服务模块](#-bocchi-llm-服务模块)
   - [目录](#目录)
   - [✨ 核心特性](#-核心特性)
   - [🧠 核心概念](#-核心概念)
@@ -58,7 +58,7 @@
 
 ## 🛠️ 安装与配置
 
-该模块作为 `zhenxun` 项目的一部分被集成，无需额外安装。核心配置主要涉及两个文件。
+该模块作为 `bocchi` 项目的一部分被集成，无需额外安装。核心配置主要涉及两个文件。
 
 ### 服务提供商配置 (`config.yaml`)
 
@@ -142,11 +142,11 @@ AI:
 
 ### **等级1: 便捷函数** - 最快速的调用方式
 
-这些函数位于 `zhenxun.services.llm` 包的顶层，为你处理了所有的底层细节。
+这些函数位于 `bocchi.services.llm` 包的顶层，为你处理了所有的底层细节。
 
 ```python
-from zhenxun.services.llm import chat, search, code, pipeline_chat, embed, analyze_multimodal, search_multimodal
-from zhenxun.services.llm.utils import create_multimodal_message
+from bocchi.services.llm import chat, search, code, pipeline_chat, embed, analyze_multimodal, search_multimodal
+from bocchi.services.llm.utils import create_multimodal_message
 
 # 1. 纯文本聊天
 response_text = await chat("你好，请用苏轼的风格写一首关于月亮的诗。")
@@ -198,7 +198,7 @@ print(search_result['text'])
 当你需要进行有上下文的、连续的对话时，`AI` 类是你的最佳选择。
 
 ```python
-from zhenxun.services.llm import AI, AIConfig
+from bocchi.services.llm import AI, AIConfig
 
 # 初始化一个AI会话，可以传入自定义配置
 ai_config = AIConfig(model="GLM/glm-4-flash", temperature=0.7)
@@ -244,8 +244,8 @@ ai_session.clear_history()
 这是最底层的 API，为你提供对模型实例的完全控制。推荐使用 `async with` 语句来优雅地管理模型实例的生命周期。
 
 ```python
-from zhenxun.services.llm import get_model_instance, LLMMessage
-from zhenxun.services.llm.config import LLMGenerationConfig
+from bocchi.services.llm import get_model_instance, LLMMessage
+from bocchi.services.llm.config import LLMGenerationConfig
 
 # 1. 获取模型实例
 # get_model_instance 返回一个异步上下文管理器
@@ -279,7 +279,7 @@ async with await get_model_instance("Gemini/gemini-1.5-pro") as model:
 -   **`CommonOverrides`**: 一个包含多种常用配置预设的类，如 `creative()`, `precise()`, `gemini_json()` 等，能极大地简化配置过程。
 
 ```python
-from zhenxun.services.llm.config import LLMGenerationConfig, CommonOverrides
+from bocchi.services.llm.config import LLMGenerationConfig, CommonOverrides
 
 # LLMGenerationConfig 完整参数示例
 comprehensive_config = LLMGenerationConfig(
@@ -343,7 +343,7 @@ multimodal_config = CommonOverrides.gemini_multimodal()     # 多模态优化模
 使用 `@tool_registry.function_tool` 装饰器注册一个简单的函数工具。
 
 ```python
-from zhenxun.services.llm import tool_registry
+from bocchi.services.llm import tool_registry
 
 @tool_registry.function_tool(
     name="query_stock_price",
@@ -368,7 +368,7 @@ async def query_stock_price(stock_symbol: str) -> dict:
 ```python
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
-from zhenxun.services.llm import tool_registry
+from bocchi.services.llm import tool_registry
 
 # 定义工具的配置模型
 class MyToolConfig(BaseModel):
@@ -395,7 +395,7 @@ async def my_tool_factory(config: MyToolConfig):
 在 `analyze` 或 `generate_response` 中使用 `use_tools` 参数。框架会自动处理整个调用流程。
 
 ```python
-from zhenxun.services.llm import analyze
+from bocchi.services.llm import analyze
 from nonebot_plugin_alconna.uniseg import UniMessage
 
 response = await analyze(
@@ -413,8 +413,8 @@ print(response.text) # 输出应为 "苹果公司(AAPL)的当前股价为175.5�
 -   **`unimsg_to_llm_parts`**: 框架内部使用的核心转换函数，将 `UniMessage` 的各个段（文本、图片等）转换为 `LLMContentPart` 列表。
 
 ```python
-from zhenxun.services.llm import analyze
-from zhenxun.services.llm.utils import create_multimodal_message
+from bocchi.services.llm import analyze
+from bocchi.services.llm.utils import create_multimodal_message
 from pathlib import Path
 
 # 从本地文件创建消息
@@ -434,7 +434,7 @@ print(response.text)
 模块提供了一些工具函数来管理你的模型配置。
 
 ```python
-from zhenxun.services.llm.manager import (
+from bocchi.services.llm.manager import (
     list_available_models,
     list_embedding_models,
     set_global_default_model_name,
@@ -467,7 +467,7 @@ await reset_key_status("Gemini")
 模块提供了模型实例缓存功能，可以提高性能并减少重复初始化的开销。
 
 ```python
-from zhenxun.services.llm import clear_model_cache, get_cache_stats
+from bocchi.services.llm import clear_model_cache, get_cache_stats
 
 # 获取缓存统计信息
 stats = get_cache_stats()
@@ -485,7 +485,7 @@ print("模型缓存已清空")
 所有模块内的预期错误都会被包装成 `LLMException`，方便统一处理。
 
 ```python
-from zhenxun.services.llm import chat, LLMException, LLMErrorCode
+from bocchi.services.llm import chat, LLMException, LLMErrorCode
 
 try:
     await chat("test", model="InvalidProvider/invalid_model")
@@ -503,7 +503,7 @@ except LLMException as e:
 
     ```python
     # my_adapters/custom_adapter.py
-    from zhenxun.services.llm.adapters import BaseAdapter, RequestData, ResponseData
+    from bocchi.services.llm.adapters import BaseAdapter, RequestData, ResponseData
 
     class MyCustomAdapter(BaseAdapter):
         @property
@@ -517,7 +517,7 @@ except LLMException as e:
 2.  **注册适配器**: 在你的插件初始化代码中注册你的适配器。
 
     ```python
-    from zhenxun.services.llm.adapters import register_adapter
+    from bocchi.services.llm.adapters import register_adapter
     from .my_adapters.custom_adapter import MyCustomAdapter
     
     register_adapter(MyCustomAdapter())

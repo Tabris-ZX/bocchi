@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "zhenxun_bot"
+name = "bocchi_bot"
 version = "0.2.4"
 description = "基于 Nonebot2 和 go-cqhttp 开发，以 postgresql 作为数据库，非常可爱的后藤一里bot"
 authors = ["Tabris_ZX <3146463122@qq.com>"]
@@ -78,7 +78,7 @@ plugins = [
     "nonebot_plugin_alconna",
     "nonebot_plugin_resolver2",
 ]
-plugin_dirs = ["zhenxun/services", "zhenxun/builtin_plugins", "zhenxun/plugins"]
+plugin_dirs = ["bocchi/services", "bocchi/builtin_plugins", "bocchi/plugins"]
 adapters = [
     { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" },
     #    { name = "DoDo", module_name = "nonebot.adapters.dodo" },
@@ -120,7 +120,7 @@ ignore = [
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
-known-first-party = ["zhenxun", "tests/*"]
+known-first-party = ["bocchi", "tests/*"]
 extra-standard-library = ["typing_extensions"]
 
 [tool.ruff.lint.flake8-pytest-style]

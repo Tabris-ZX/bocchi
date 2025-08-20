@@ -2,7 +2,7 @@
   "name": "深空蓝",
   "extends": "classic",
   "description": "现代、深邃的蓝色科技感主题。",
-  "author": "ZhenxunBot",
+  "author": "bocchiBot",
   "assets": {
     "style": "styles.css"
   },

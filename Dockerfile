@@ -36,7 +36,7 @@ RUN --mount=type=bind,source=./.git/,target=/tmp/.git/ \
 
 FROM python:3.11-slim-bookworm
 
-WORKDIR /app/zhenxun
+WORKDIR /app/bocchi
 
 ENV TZ=Asia/Shanghai PYTHONUNBUFFERED=1
 #COPY ./scripts/docker/start.sh /start.sh
@@ -62,6 +62,6 @@ RUN playwright install --with-deps chromium \
 
 COPY --from=metadata-stage /tmp/VERSION /app/VERSION
 
-VOLUME ["/app/zhenxun/data", "/app/zhenxun/resources", "/app/zhenxun/log"]
+VOLUME ["/app/bocchi/data", "/app/bocchi/resources", "/app/bocchi/log"]
 
 CMD ["python", "bot.py"]

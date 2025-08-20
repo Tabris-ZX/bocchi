@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: zhenxun
+      POSTGRES_DB: bocchi
     volumes:
       - pgdata:/var/lib/postgresql/data
     labels:
@@ -16,7 +16,7 @@ services:
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter
     environment:
-      DATA_SOURCE_NAME: "postgresql://postgres:password@db:5432/zhenxun?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://postgres:password@db:5432/bocchi?sslmode=disable"
     ports:
       - "9187:9187"
     depends_on:

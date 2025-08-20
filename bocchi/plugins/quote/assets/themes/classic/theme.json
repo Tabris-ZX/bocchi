@@ -1,7 +1,7 @@
 {
   "name": "经典黑",
   "description": "复刻旧版的经典黑底白字样式。",
-  "author": "ZhenxunBot",
+  "author": "bocchiBot",
   "viewport": { "width": 1200, "height": 400 },
   "assets": {
     "template": "template.html",
