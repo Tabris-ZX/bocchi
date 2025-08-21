@@ -19,7 +19,7 @@ def get_content_bytes(file: str) -> bytes:
 def init_mocked_api(mocked_api: MockRouter) -> None:
     # metadata
     mocked_api.get(
-        "https://data.jsdelivr.com/v1/packages/gh/bocchi-org/bocchi_bot_plugins@main",
+        "https://data.jsdelivr.com/v1/packages/gh/zhenxun-org/bocchi_bot_plugins@main",
         name="bocchi_bot_plugins_metadata",
     ).respond(json=get_response_json("bocchi_bot_plugins_metadata.json"))
     mocked_api.get(
@@ -27,7 +27,7 @@ def init_mocked_api(mocked_api: MockRouter) -> None:
         name="bocchi_github_sub_metadata",
     ).respond(json=get_response_json("bocchi_github_sub_metadata.json"))
     mocked_api.get(
-        "https://data.jsdelivr.com/v1/packages/gh/bocchi-org/bocchi_bot_plugins@b101fbc",
+        "https://data.jsdelivr.com/v1/packages/gh/zhenxun-org/bocchi_bot_plugins@b101fbc",
         name="bocchi_bot_plugins_metadata_commit",
     ).respond(json=get_response_json("bocchi_bot_plugins_metadata.json"))
     mocked_api.get(
@@ -37,7 +37,7 @@ def init_mocked_api(mocked_api: MockRouter) -> None:
 
     # tree
     mocked_api.get(
-        "https://api.github.com/repos/bocchi-org/bocchi_bot_plugins/git/trees/main?recursive=1",
+        "https://api.github.com/repos/zhenxun-org/bocchi_bot_plugins/git/trees/main?recursive=1",
         name="bocchi_bot_plugins_tree",
     ).respond(json=get_response_json("bocchi_bot_plugins_tree.json"))
     mocked_api.get(
@@ -45,7 +45,7 @@ def init_mocked_api(mocked_api: MockRouter) -> None:
         name="bocchi_github_sub_tree",
     ).respond(json=get_response_json("bocchi_github_sub_tree.json"))
     mocked_api.get(
-        "https://api.github.com/repos/bocchi-org/bocchi_bot_plugins/git/trees/b101fbc?recursive=1",
+        "https://api.github.com/repos/zhenxun-org/bocchi_bot_plugins/git/trees/b101fbc?recursive=1",
         name="bocchi_bot_plugins_tree_commit",
     ).respond(json=get_response_json("bocchi_bot_plugins_tree.json"))
     mocked_api.get(
@@ -59,53 +59,53 @@ def init_mocked_api(mocked_api: MockRouter) -> None:
     ).respond(200, text="")
 
     mocked_api.get(
-        "https://raw.githubusercontent.com/bocchi-org/bocchi_bot_plugins/b101fbc/plugins.json",
+        "https://raw.githubusercontent.com/zhenxun-org/bocchi_bot_plugins/b101fbc/plugins.json",
         name="basic_plugins",
     ).respond(json=get_response_json("basic_plugins.json"))
     mocked_api.get(
-        "https://cdn.jsdelivr.net/gh/bocchi-org/bocchi_bot_plugins@b101fbc/plugins.json",
+        "https://cdn.jsdelivr.net/gh/zhenxun-org/bocchi_bot_plugins@b101fbc/plugins.json",
         name="basic_plugins_jsdelivr",
     ).respond(200, json=get_response_json("basic_plugins.json"))
     mocked_api.get(
-        "https://raw.githubusercontent.com/bocchi-org/bocchi_bot_plugins/main/plugins.json",
+        "https://raw.githubusercontent.com/zhenxun-org/bocchi_bot_plugins/main/plugins.json",
         name="basic_plugins_no_commit",
     ).respond(json=get_response_json("basic_plugins.json"))
     mocked_api.get(
-        "https://cdn.jsdelivr.net/gh/bocchi-org/bocchi_bot_plugins@main/plugins.json",
+        "https://cdn.jsdelivr.net/gh/zhenxun-org/bocchi_bot_plugins@main/plugins.json",
         name="basic_plugins_jsdelivr_no_commit",
     ).respond(200, json=get_response_json("basic_plugins.json"))
 
     mocked_api.get(
-        "https://raw.githubusercontent.com/bocchi-org/bocchi_bot_plugins_index/2ed61284873c526802752b12a3fd3b5e1a59d948/plugins.json",
+        "https://raw.githubusercontent.com/zhenxun-org/bocchi_bot_plugins_index/2ed61284873c526802752b12a3fd3b5e1a59d948/plugins.json",
         name="extra_plugins",
     ).respond(200, json=get_response_json("extra_plugins.json"))
     mocked_api.get(
-        "https://cdn.jsdelivr.net/gh/bocchi-org/bocchi_bot_plugins_index@2ed61284873c526802752b12a3fd3b5e1a59d948/plugins.json",
+        "https://cdn.jsdelivr.net/gh/zhenxun-org/bocchi_bot_plugins_index@2ed61284873c526802752b12a3fd3b5e1a59d948/plugins.json",
         name="extra_plugins_jsdelivr",
     ).respond(200, json=get_response_json("extra_plugins.json"))
     mocked_api.get(
-        "https://raw.githubusercontent.com/bocchi-org/bocchi_bot_plugins_index/index/plugins.json",
+        "https://raw.githubusercontent.com/zhenxun-org/bocchi_bot_plugins_index/index/plugins.json",
         name="extra_plugins_no_commit",
     ).respond(200, json=get_response_json("extra_plugins.json"))
     mocked_api.get(
-        "https://cdn.jsdelivr.net/gh/bocchi-org/bocchi_bot_plugins_index@index/plugins.json",
+        "https://cdn.jsdelivr.net/gh/zhenxun-org/bocchi_bot_plugins_index@index/plugins.json",
         name="extra_plugins_jsdelivr_no_commit",
     ).respond(200, json=get_response_json("extra_plugins.json"))
 
     mocked_api.get(
-        "https://raw.githubusercontent.com/bocchi-org/bocchi_bot_plugins/main/plugins/search_image/__init__.py",
+        "https://raw.githubusercontent.com/zhenxun-org/bocchi_bot_plugins/main/plugins/search_image/__init__.py",
         name="search_image_plugin_file_init",
     ).respond(content=get_content_bytes("search_image.py"))
     mocked_api.get(
-        "https://raw.githubusercontent.com/bocchi-org/bocchi_bot_plugins/b101fbc/plugins/search_image/__init__.py",
+        "https://raw.githubusercontent.com/zhenxun-org/bocchi_bot_plugins/b101fbc/plugins/search_image/__init__.py",
         name="search_image_plugin_file_init_commit",
     ).respond(content=get_content_bytes("search_image.py"))
     mocked_api.get(
-        "https://raw.githubusercontent.com/bocchi-org/bocchi_bot_plugins/main/plugins/alapi/jitang.py",
+        "https://raw.githubusercontent.com/zhenxun-org/bocchi_bot_plugins/main/plugins/alapi/jitang.py",
         name="jitang_plugin_file",
     ).respond(content=get_content_bytes("jitang.py"))
     mocked_api.get(
-        "https://raw.githubusercontent.com/bocchi-org/bocchi_bot_plugins/b101fbc/plugins/alapi/jitang.py",
+        "https://raw.githubusercontent.com/zhenxun-org/bocchi_bot_plugins/b101fbc/plugins/alapi/jitang.py",
         name="jitang_plugin_file_commit",
     ).respond(content=get_content_bytes("jitang.py"))
     mocked_api.get(
@@ -117,24 +117,24 @@ def init_mocked_api(mocked_api: MockRouter) -> None:
         name="github_sub_plugin_file_init_commit",
     ).respond(content=get_content_bytes("github_sub.py"))
     mocked_api.get(
-        "https://raw.githubusercontent.com/bocchi-org/bocchi_bot_plugins/b101fbc/plugins/bilibili_sub/__init__.py",
+        "https://raw.githubusercontent.com/zhenxun-org/bocchi_bot_plugins/b101fbc/plugins/bilibili_sub/__init__.py",
         name="bilibili_sub_plugin_file_init",
     ).respond(content=get_content_bytes("bilibili_sub.py"))
 
     mocked_api.get(
-        "https://api.github.com/repos/bocchi-org/bocchi_bot_plugins/commits/main",
+        "https://api.github.com/repos/zhenxun-org/bocchi_bot_plugins/commits/main",
         name="bocchi_bot_plugins_commit",
     ).respond(json=get_response_json("bocchi_bot_plugins_commit.json"))
     mocked_api.get(
-        "https://git-api.bocchi.org/repos/bocchi-org/bocchi_bot_plugins/commits/main",
+        "https://git-api.bocchi.org/repos/zhenxun-org/bocchi_bot_plugins/commits/main",
         name="bocchi_bot_plugins_commit_proxy",
     ).respond(json=get_response_json("bocchi_bot_plugins_commit.json"))
     mocked_api.get(
-        "https://api.github.com/repos/bocchi-org/bocchi_bot_plugins_index/commits/index",
+        "https://api.github.com/repos/zhenxun-org/bocchi_bot_plugins_index/commits/index",
         name="bocchi_bot_plugins_index_commit",
     ).respond(json=get_response_json("bocchi_bot_plugins_index_commit.json"))
     mocked_api.get(
-        "https://git-api.bocchi.org/repos/bocchi-org/bocchi_bot_plugins_index/commits/index",
+        "https://git-api.bocchi.org/repos/zhenxun-org/bocchi_bot_plugins_index/commits/index",
         name="bocchi_bot_plugins_index_commit_proxy",
     ).respond(json=get_response_json("bocchi_bot_plugins_index_commit.json"))
     mocked_api.get(

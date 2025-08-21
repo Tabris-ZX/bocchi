@@ -112,7 +112,7 @@ async def test_plugin_store_fail(
 
     init_mocked_api(mocked_api=mocked_api)
     mocked_api.get(
-        "https://raw.githubusercontent.com/bocchi-org/bocchi_bot_plugins/b101fbc/plugins.json",
+        "https://raw.githubusercontent.com/zhenxun-org/bocchi_bot_plugins/b101fbc/plugins.json",
         name="basic_plugins",
     ).respond(404)
 

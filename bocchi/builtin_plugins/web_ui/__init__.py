@@ -85,11 +85,30 @@ BaseApiRouter.include_router(system_router)
 BaseApiRouter.include_router(menu_router)
 BaseApiRouter.include_router(configure_router)
 
+# 兼容旧前缀：/zhenxun/api
+CompatApiRouter = APIRouter(prefix="/zhenxun/api")
+CompatApiRouter.include_router(auth_router)
+CompatApiRouter.include_router(store_router)
+CompatApiRouter.include_router(dashboard_router)
+CompatApiRouter.include_router(main_router)
+CompatApiRouter.include_router(manage_router)
+CompatApiRouter.include_router(database_router)
+CompatApiRouter.include_router(plugin_router)
+CompatApiRouter.include_router(system_router)
+CompatApiRouter.include_router(menu_router)
+CompatApiRouter.include_router(configure_router)
+
 WsApiRouter = APIRouter(prefix="/bocchi/socket")
 
 WsApiRouter.include_router(ws_log_routes)
 WsApiRouter.include_router(status_routes)
 WsApiRouter.include_router(chat_routes)
+
+# 兼容旧前缀：/zhenxun/socket
+CompatWsRouter = APIRouter(prefix="/zhenxun/socket")
+CompatWsRouter.include_router(ws_log_routes)
+CompatWsRouter.include_router(status_routes)
+CompatWsRouter.include_router(chat_routes)
 
 
 @PriorityLifecycle.on_startup(priority=0)
@@ -116,7 +135,9 @@ async def _():
 
         app: FastAPI = nonebot.get_app()
         app.include_router(BaseApiRouter)
+        app.include_router(CompatApiRouter)
         app.include_router(WsApiRouter)
+        app.include_router(CompatWsRouter)
         await init_public(app)
         logger.info("<g>API启动成功</g>", "WebUi")
     except Exception as e:

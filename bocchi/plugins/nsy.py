@@ -3,8 +3,8 @@ from pathlib import Path
 from datetime import datetime
 
 from nonebot.plugin import PluginMetadata
-from nonebot_plugin_alconna import Alconna, Args, on_alconna, Image as AlcImage
-from nonebot_plugin_session import EventSession
+from nonebot_plugin_alconna import Alconna, Args, on_alconna, Image, Arparma, Reply, UniMessage
+from nonebot_plugin_alconna.uniseg.tools import reply_fetch
 
 from bocchi.configs.path_config import DATA_PATH
 from bocchi.configs.utils import Command, PluginExtraData
@@ -13,10 +13,10 @@ from bocchi.utils.message import MessageUtils
 
 __plugin_meta__ = PluginMetadata(
     name="nsy图片发送",
-    description="随机发送nsy图片",
+    description="怎么这么多nsyc啊~",
     usage="""
     nsy ?[名字] ?[num=1]: 发送指定名字的图片(为空则全局随机)，num为数量
-    上传 [名字] [图片]: 上传图片到指定名字的目录
+    上传 [名字] [图片]: 上传图片到指定名字的目录；也可先引用一张图片后发送：上传 [名字]
     """,
     extra=PluginExtraData(
         author="Tabris_ZX",
@@ -44,7 +44,7 @@ upload_matcher = on_alconna(
     Alconna(
         "上传",
         Args["name", str],
-        Args["img", AlcImage]
+        Args["image?", Image],
     ),
     priority=5,
     block=True,
@@ -92,71 +92,93 @@ async def _(name: str, num: int):
             await MessageUtils.build_message(f"目录中没有可用的图片: data/nsy/{name}").finish()
 
     # 发送图片
-    for img_path in img_paths:
-        await MessageUtils.build_message(img_path).send()
+    if len(img_paths) == 1:
+        await MessageUtils.build_message(img_paths[0]).send()
+    else:
+        img_msg = [Image(path=img_path) for img_path in img_paths]
+        alc_msg= MessageUtils.build_message(img_msg)
+        await MessageUtils.alc_forward_msg(alc_msg, '3541219424', '可爱的小波奇').send()
 
     log_name = name or "随机"
     logger.info(f"发送 nsy {log_name} 图片: {len(img_paths)} 张")
 
 @upload_matcher.handle()
-async def upload(session: EventSession, name: str, img: AlcImage):
-    """上传图片到指定目录"""
+async def upload(bot, event, params: Arparma):
+    """上传图片到指定目录，支持直接带图或引用图片后发送命令"""
     try:
+        name = params.query("name")
+        if not name:
+            await MessageUtils.build_message("请提供目录名：上传 [名字] [图片]").finish()
+
         # 确保根目录存在
         nsy_path.mkdir(parents=True, exist_ok=True)
         
         # 创建或获取目标子目录
-        target_dir = nsy_path / name
-        target_dir.mkdir(exist_ok=True)
+        # target_dir = nsy_path / name
+        # target_dir.mkdir(exist_ok=True)
         
         # 生成唯一文件名（时间戳 + 随机数）
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now().strftime("%m%d%H%M")
         import random
         random_suffix = random.randint(1000, 9999)
+
+        # 获取图片：优先参数 image，其次尝试从引用消息中提取
+        image = params.query("image") or await reply_fetch(event, bot)
+        if isinstance(image, Reply) and not isinstance(image.msg, str):
+            # 展开引用内容并从中提取第一张图片
+            uni = await UniMessage.generate(message=image.msg, event=event, bot=bot)
+            for seg in uni:
+                if isinstance(seg, Image):
+                    image = seg
+                    break
         
-        # 获取图片格式，默认为PNG
-        ext = ".png"  # 默认扩展名
+        source_bytes: bytes | None = None
+        source_path: str | None = None
+        source_url: str | None = None
+
+        if isinstance(image, Image):
+            if image.raw:
+                if isinstance(image.raw, bytes):
+                    source_bytes = image.raw
+                elif hasattr(image.raw, "getvalue"):
+                    source_bytes = image.raw.getvalue()
+            if not source_bytes and getattr(image, "path", None):
+                source_path = image.path  # type: ignore
+            if not source_bytes and not source_path and getattr(image, "url", None):
+                source_url = image.url  # type: ignore
         
+        if not (source_bytes or source_path or source_url):
+            await MessageUtils.build_message("未检测到图片，请直接带图发送，或引用一张图片再发送本命令").finish()
+            return
+
+        # 仅保存为 png
+        ext = ".png"
         filename = f"{timestamp}_{random_suffix}{ext}"
-        file_path = target_dir / filename
-        
-        # 保存图片
-        if hasattr(img, 'raw') and img.raw:
-            # 如果是二进制数据
-            if isinstance(img.raw, bytes):
-                with open(file_path, 'wb') as f:
-                    f.write(img.raw)
-            elif hasattr(img.raw, 'getvalue'):
-                # BytesIO 对象
-                with open(file_path, 'wb') as f:
-                    f.write(img.raw.getvalue())
-            else:
-                await MessageUtils.build_message("无法识别的图片数据格式").finish()
-                return
-        elif hasattr(img, 'path') and img.path:
-            # 如果是文件路径，复制文件
+        file_path = nsy_path / name / filename
+
+        # 写入文件
+        if source_bytes is not None:
+            with open(file_path, "wb") as f:
+                f.write(source_bytes)
+        elif source_path:
             import shutil
-            shutil.copy2(img.path, file_path)
-        elif hasattr(img, 'url') and img.url:
-            # 如果是URL，下载图片
+            shutil.copy2(source_path, file_path)
+        elif source_url:
             import httpx
             async with httpx.AsyncClient() as client:
-                response = await client.get(img.url)
-                with open(file_path, 'wb') as f:
-                    f.write(response.content)
-        else:
-            await MessageUtils.build_message("无法识别的图片格式").finish()
-            return
-        
+                resp = await client.get(source_url)
+                with open(file_path, "wb") as f:
+                    f.write(resp.content)
+
         # 验证文件是否成功保存
         if file_path.exists() and file_path.stat().st_size > 0:
             await MessageUtils.build_message(f"图片上传成功！\n保存路径: data/nsy/{name}/{filename}").send()
-            logger.info(f"图片上传成功: {file_path}", "上传", session=session)
+            logger.info(f"图片上传成功: {file_path}", "上传")
         else:
             await MessageUtils.build_message("图片上传失败，请重试").finish()
-            
+    
     except Exception as e:
-        logger.error(f"图片上传失败: {e}", "上传", e=e, session=session)
+        logger.error(f"图片上传失败: {e}", "上传", e=e)
         await MessageUtils.build_message(f"图片上传失败: {str(e)}").finish()
     
 

@@ -16,7 +16,7 @@ class DownloadResourceException(Exception):
 
 
 class ResourceManager:
-    GITHUB_URL = "https://github.com/bocchi-org/bocchi-bot-resources/tree/main"
+    GITHUB_URL = "https://github.com/zhenxun-org/bocchi-bot-resources/tree/main"
 
     RESOURCE_PATH = Path() / "resources"
 
@@ -72,7 +72,7 @@ class ResourceManager:
         if not await AsyncHttpx.download_file(url, cls.ZIP_FILE, stream=True):
             logger.error(
                 "下载resources资源包失败，请尝试重启重新下载或前往 "
-                "https://github.com/bocchi-org/bocchi-bot-resources 手动下载..."
+                "https://github.com/zhenxun-org/bocchi-bot-resources 手动下载..."
             )
             raise DownloadResourceException("下载resources资源包失败...")
         logger.debug("下载resources资源文件压缩包完成...", CMD_STRING)

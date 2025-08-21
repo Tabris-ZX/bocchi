@@ -17,7 +17,8 @@ WEBUI_DATA_PATH = DATA_PATH / WEBUI_STRING
 PUBLIC_PATH = WEBUI_DATA_PATH / PUBLIC_STRING
 TMP_PATH = TEMP_PATH / WEBUI_STRING
 
-WEBUI_DIST_GITHUB_URL = "https://github.com/HibiKier/bocchi_bot_webui/tree/dist"
+# 更新地址
+WEBUI_DIST_GITHUB_URL = "https://github.com/HibiKier/zhenxun_bot_webui/tree/dist"
 
 app = nonebot.get_app()
 
