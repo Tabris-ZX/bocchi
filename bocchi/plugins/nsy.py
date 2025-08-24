@@ -13,14 +13,14 @@ from bocchi.utils.message import MessageUtils
 
 __plugin_meta__ = PluginMetadata(
     name="nsy图片发送",
-    description="怎么这么多nsyc啊~",
+    description="怎么这么多nsyc啊~\n为什么什么照片都往上放啊喂,脱离本意了啊!~",
     usage="""
     nsy ?[名字] ?[num=1]: 发送指定名字的图片(为空则全局随机)，num为数量
     上传 [名字] [图片]: 上传图片到指定名字的目录；也可先引用一张图片后发送：上传 [名字]
     """,
     extra=PluginExtraData(
         author="Tabris_ZX",
-        version="0.3",
+        version="0.4",
         commands=[
             Command(command="nsy <名字>", description="发送指定名字的图片(为空则随机发送)"),
             Command(command="上传 <名字> <图片>", description="上传图片到指定名字的目录")
@@ -56,17 +56,17 @@ def pick_images_from_dir(directory: Path, count: int) -> list[Path]:
     files = [p for p in directory.iterdir() if p.is_file() and p.suffix.lower() in valid_exts]
     if not files:
         return []
-    return sample(files, min(count, len(files))) if count <= len(files) else [choice(files) for _ in range(count)]
+    return sample(files, min(count, len(files)))
 
 @_matcher.handle()
-async def _(name: str, num: int):
+async def send_nsy(name: str, num: int):
     num = max(num, 1)
     if not nsy_path.exists() or not nsy_path.is_dir():
         await MessageUtils.build_message("图片目录不存在: data/nsy").finish()
 
     # 获取图片列表
     img_paths: list[Path] = []
-    if not name:
+    if not name or name == "随机":
         # 全局随机：遍历所有子目录聚合后抽取
         all_images: list[Path] = []
         for sub in nsy_path.iterdir():
@@ -74,7 +74,7 @@ async def _(name: str, num: int):
                 all_images.extend(p for p in sub.iterdir() if p.is_file() and p.suffix.lower() in valid_exts)
         if not all_images:
             await MessageUtils.build_message("目录中没有可用的图片: data/nsy/*").finish()
-        img_paths = sample(all_images, min(num, len(all_images))) if num <= len(all_images) else [choice(all_images) for _ in range(num)]
+        img_paths = sample(all_images, min(num, len(all_images)))
     else:
         # 按名字包含匹配目录：当输入包含某个目录名时匹配；多个则按字典序取最前
         try:
@@ -95,8 +95,7 @@ async def _(name: str, num: int):
     if len(img_paths) == 1:
         await MessageUtils.build_message(img_paths[0]).send()
     else:
-        img_msg = [Image(path=img_path) for img_path in img_paths]
-        alc_msg= MessageUtils.build_message(img_msg)
+        alc_msg= MessageUtils.build_message(img_paths)
         await MessageUtils.alc_forward_msg(alc_msg, '3541219424', '可爱的小波奇').send()
 
     log_name = name or "随机"
@@ -108,19 +107,19 @@ async def upload(bot, event, params: Arparma):
     try:
         name = params.query("name")
         if not name:
-            await MessageUtils.build_message("请提供目录名：上传 [名字] [图片]").finish()
+            await MessageUtils.build_message("请提供目录名：上传 [名字] [图片]").finish(reply_to=True)
 
         # 确保根目录存在
         nsy_path.mkdir(parents=True, exist_ok=True)
         
         # 创建或获取目标子目录
-        # target_dir = nsy_path / name
-        # target_dir.mkdir(exist_ok=True)
+        target_dir = nsy_path / name
+        target_dir.mkdir(exist_ok=True)
         
         # 生成唯一文件名（时间戳 + 随机数）
-        timestamp = datetime.now().strftime("%m%d%H%M")
-        import random
-        random_suffix = random.randint(1000, 9999)
+        timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
+        # import random
+        # random_suffix = random.randint(1000, 9999)
 
         # 获取图片：优先参数 image，其次尝试从引用消息中提取
         image = params.query("image") or await reply_fetch(event, bot)
@@ -148,13 +147,13 @@ async def upload(bot, event, params: Arparma):
                 source_url = image.url  # type: ignore
         
         if not (source_bytes or source_path or source_url):
-            await MessageUtils.build_message("未检测到图片，请直接带图发送，或引用一张图片再发送本命令").finish()
+            await MessageUtils.build_message("未检测到图片，请直接带图发送，或引用一张图片再发送本命令").finish(reply_to=True)
             return
 
         # 仅保存为 png
         ext = ".png"
-        filename = f"{timestamp}_{random_suffix}{ext}"
-        file_path = nsy_path / name / filename
+        filename = f"{timestamp}{ext}"
+        file_path = target_dir / filename
 
         # 写入文件
         if source_bytes is not None:
@@ -172,13 +171,13 @@ async def upload(bot, event, params: Arparma):
 
         # 验证文件是否成功保存
         if file_path.exists() and file_path.stat().st_size > 0:
-            await MessageUtils.build_message(f"图片上传成功！\n保存路径: data/nsy/{name}/{filename}").send()
+            await MessageUtils.build_message(f"图片上传成功！").send(reply_to=True)
             logger.info(f"图片上传成功: {file_path}", "上传")
         else:
-            await MessageUtils.build_message("图片上传失败，请重试").finish()
+            await MessageUtils.build_message("图片上传失败，请重试").finish(reply_to=True)
     
     except Exception as e:
         logger.error(f"图片上传失败: {e}", "上传", e=e)
-        await MessageUtils.build_message(f"图片上传失败: {str(e)}").finish()
+        await MessageUtils.build_message(f"图片上传失败: {str(e)}").finish(reply_to=True)
     
 

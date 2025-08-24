@@ -36,10 +36,10 @@ __plugin_meta__ = PluginMetadata(
     商品操作
     指令：
         商店
-        我的金币
+        我的金币/金币
         我的道具
         使用道具 [名称/Id]
-        购买道具 [名称/Id]
+        购买道具 [名称/Id] ?[数量=1]
         金币排行 ?[num=10]
         金币总排行 ?[num=10]
     """.strip(),
@@ -95,7 +95,7 @@ _use_matcher = on_alconna(
 
 _msg_notice_matcher = on_alconna(
     Alconna("使用道具0"),
-    aliases={"使用道具1","使用道具2","使用道具3","购买道具0","购买道具1","购买道具2","购买道具3"},
+    aliases={"使用道具1","使用道具2","使用道具3","使用道具4","使用道具5","使用道具6","使用道具7"},
     priority=5,
     block=True,
 )
@@ -108,7 +108,7 @@ _matcher.shortcut(
 )
 
 _matcher.shortcut(
-    "查看金币",
+    "金币",
     command="商店",
     arguments=["my-cost"],
     prefix=True,
@@ -183,7 +183,7 @@ async def _(
 ):
     if not name.available:
         await MessageUtils.build_message(
-            "请在指令后跟需要购买的道具名称或id...(指令后的的道具或id前要空格)"
+            "请在指令后跟需要购买的道具名称或id..."
         ).finish(reply_to=True)
     logger.info(
         f"购买道具 {name}, 数量: {num}",

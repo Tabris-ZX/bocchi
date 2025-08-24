@@ -37,6 +37,7 @@ class SetuManage:
         num: int = 10,
         tags: list[str] | None = None,
         is_r18: bool = False,
+        local: bool =False 
     ) -> list[UniMessage] | str:
         """获取色图
 
@@ -60,7 +61,7 @@ class SetuManage:
             if isinstance(file, str):
                 return file
             return [cls.init_image_message(file, data_list[0])]
-        if base_config.get("ONLY_USE_LOCAL_SETU"):
+        if base_config.get("ONLY_USE_LOCAL_SETU") or local:
             """仅使用本地色图"""
             flag = False
             data_list = await cls.get_setu_list(tags=tags, num=num, is_r18=is_r18)
@@ -248,12 +249,16 @@ class SetuManage:
         返回:
             list[Setu] | str: 色图数据或返回消息
         """
+        # 控制 API 请求数量，最多 20，最少 1
+        request_num = min(max(num, 1), 20)
+
         params = {
-            "r18": 1 if is_r18 else 0,  # 添加r18参数 0为否，1为是，2为混合
-            "tag": tags,  # 若指定tag
-            "num": 20,  # 一次返回的结果数量
+            "r18": 1 if is_r18 else 0,
+            "tag": tags,
+            "num": request_num,
             "size": ["original"],
         }
+
         for count in range(3):
             logger.debug(f"尝试获取图片URL第 {count+1} 次", "色图")
             try:
@@ -264,16 +269,23 @@ class SetuManage:
                     data = response.json()
                     if data["error"]:
                         return "没找到符合条件的色图..."
+
                     data = data["data"]
                     result_list = cls.__handle_data(data)
-                    num = min(num, len(data))
-                    random_list = random.sample(result_list, num)
-                    return random_list or "没找到符合条件的色图..."
+
+                    # 如果 API 返回数量 >= 用户请求数量，随机抽取
+                    if len(result_list) >= num:
+                        return random.sample(result_list, num)
+
+                    # 否则就把所有结果都返回（可能数量比 num 少）
+                    return result_list or "没找到符合条件的色图..."
             except TimeoutError as e:
                 logger.error("获取图片URL超时", "色图", e=e)
             except Exception as e:
                 logger.error("访问页面错误", "色图", e=e)
+
         return "我网线被人拔了..QAQ"
+
 
     @classmethod
     def __handle_data(cls, data: dict) -> list[Setu]:
@@ -287,7 +299,8 @@ class SetuManage:
         """
         result_list = []
         for i in range(len(data)):
-            img_url = data[i]["urls"]["original"]
+            # 根据API请求的尺寸获取对应的URL
+            img_url = data[i]["urls"]["original"] 
             img_url = change_pixiv_image_links(img_url)
             title = data[i]["title"]
             author = data[i]["author"]

@@ -125,9 +125,9 @@ __plugin_meta__ = PluginMetadata(
             RegisterConfig(
                 module="pixiv",
                 key="PIXIV_NGINX_URL",
-                value="i.pixiv.re",
+                value="pximg.hakurei.cc",
                 help="Pixiv反向代理",
-                default_value="i.pixiv.re",
+                default_value="pximg.hakurei.cc",
             ),
         ],
     ).to_dict(),

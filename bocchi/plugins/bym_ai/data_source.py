@@ -490,6 +490,7 @@ class ChatManager:
         """
 
         if type == "image_url":
+            # 检查是否为base64格式
             return {"type": type, "image_url": {"url": data}}
         else:
             return {
@@ -515,6 +516,27 @@ class ChatManager:
     @classmethod
     async def _process_image(cls, message: MessageSegment | None) -> str | None:
         if isinstance(message, MessageSegment) and message.type == "image":
+            submit_strategy = base_config.get("IMAGE_UNDERSTANDING_DATA_SUBMIT_STRATEGY")
+            
+            # 如果是image_url策略，直接返回原始URL，避免下载和处理
+            if submit_strategy == "image_url":
+                original_url = message.data.get("url")
+                if original_url:
+                    logger.info(f"使用原始图片URL: {original_url}", "BYM_AI")
+                    logger.info(f"图片数据类型: {type(original_url)}", "BYM_AI")
+                    logger.info(f"图片数据内容: {message.data}", "BYM_AI")
+                    return original_url
+                else:
+                    logger.warning("无法获取图片原始URL", "BYM_AI")
+                    logger.warning(f"图片数据: {message.data}", "BYM_AI")
+                    # 检查是否启用回退机制
+                    if base_config.get("IMAGE_URL_FALLBACK_TO_BASE64", False):
+                        logger.info("启用回退机制，切换到base64策略", "BYM_AI")
+                        # 继续执行base64策略
+                    else:
+                        return None
+            
+            # 如果是base64策略，继续原来的处理流程
             file_name = message.data.get("file")
             if not file_name:
                 file_name = f"{uuid.uuid4()!s}.jpg"
@@ -525,7 +547,17 @@ class ChatManager:
                     url=message.data["url"], path=path
                 ):
                     logger.error("图片下载失败", "BYM_AI")
-            return await cls._process_image_content(path=path)
+                    return None
+                else:
+                    logger.info("图片下载成功", "BYM_AI")
+            
+            result = await cls._process_image_content(path=path)
+            if result:
+                logger.info(f"图片处理成功: {len(result)}字符", "BYM_AI")
+            else:
+                logger.warning("图片处理失败", "BYM_AI")
+            return result
+        return None
 
     @classmethod
     async def __build_content(

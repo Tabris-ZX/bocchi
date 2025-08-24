@@ -2,6 +2,7 @@ from ..config import (
     base_config,
 )
 from .gemini_storage_strategy import GeminiStorageStrategy
+from .image_url_storage_strategy import ImageUrlStorageStrategy
 from .storage_strategy import StorageStrategy
 
 
@@ -14,3 +15,6 @@ class StorageStrategyFactory:
         if data_storage_strategy == "gemini":
             if api_key := kwargs.get("api_key"):
                 return GeminiStorageStrategy(api_key=api_key)
+        elif data_storage_strategy == "image_url":
+            return ImageUrlStorageStrategy()
+        return None

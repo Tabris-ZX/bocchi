@@ -127,10 +127,11 @@ def change_pixiv_image_links(
         nginx_url = Config.get_config("pixiv", "PIXIV_NGINX_URL")
     if nginx_url:
         url = (
-            url.replace("i.pximg.net", nginx_url)
-            .replace("i.pixiv.cat", nginx_url)
-            .replace("i.pixiv.re", nginx_url)
+            url.replace("pixiv.cat", nginx_url)
+            .replace("pixiviz.xyz", nginx_url)
+            .replace("pixiv.js.org", nginx_url)
             .replace("_webp", "")
+            .replace("i.pixiv.re", nginx_url)
         )
     return url
 

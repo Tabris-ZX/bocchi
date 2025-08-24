@@ -33,7 +33,7 @@ _refuse_matcher = on_alconna(
 # 修改点1：将原来的_shoot_matcher拆分成两个独立的匹配器
 _self_shoot_matcher = on_alconna(  # 修改点：变量名前加self_表示打自己
     Alconna("开我"),
-    aliases={"打我", "我"},
+    aliases={"打我"},
     rule=ensure_group,
     priority=5,
     block=True,
@@ -41,7 +41,7 @@ _self_shoot_matcher = on_alconna(  # 修改点：变量名前加self_表示打�
 
 _opponent_shoot_matcher = on_alconna(  # 修改点：变量名前加opponent_表示打对方
     Alconna("开他"),
-    aliases={"打他", "他"},
+    aliases={"打他"},
     rule=ensure_group,
     priority=5,
     block=True,

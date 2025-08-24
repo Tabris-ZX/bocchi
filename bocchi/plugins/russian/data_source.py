@@ -165,7 +165,7 @@ class RussianManage:
                 f"{rus.player1[1]} 向",
                 At(flag="user", target=rus.at_user),
                 f"发起了决斗！请 {user.user_name if user else rus.at_user}",
-                " 在30秒内回复‘接受对决’ or ‘拒绝对决’，超时此次决斗作废！",
+                " 在30秒内回复‘接受’ or ‘拒绝’，超时此次决斗作废！",
             ]
         else:
             message_list = [
