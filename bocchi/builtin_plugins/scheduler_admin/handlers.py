@@ -7,10 +7,11 @@ from nonebot.permission import SUPERUSER
 from nonebot_plugin_alconna import AlconnaMatch, Arparma, Match, Query
 from pydantic import BaseModel, ValidationError
 
-from bocchi.models.schedule_info import ScheduleInfo
+from bocchi.models.scheduled_job import ScheduledJob
 from bocchi.services.scheduler import scheduler_manager
 from bocchi.services.scheduler.targeter import ScheduleTargeter
 from bocchi.utils.message import MessageUtils
+from bocchi.utils.pydantic_compat import model_dump
 
 from . import presenters
 from .commands import (
@@ -75,7 +76,9 @@ async def handle_view(
         await schedule_cmd.finish("没有找到任何相关的定时任务。")
 
     img = await presenters.format_schedule_list_as_image(
-        schedules=schedules, title=title, current_page=page.result
+        schedules=schedules,
+        title=title,
+        current_page=page.result if page.available else 1,
     )
     await MessageUtils.build_message(img).send(reply_to=True)
 
@@ -149,7 +152,10 @@ async def handle_set(
 
     job_kwargs = {}
     if kwargs_str.available:
-        task_meta = scheduler_manager._registered_tasks[p_name]
+        task_meta = scheduler_manager._registered_tasks.get(p_name)
+        if not task_meta:
+            await schedule_cmd.finish(f"插件 '{p_name}' 未注册。")
+
         params_model = task_meta.get("model")
         if not (
             params_model
@@ -168,11 +174,7 @@ async def handle_set(
 
             validated_model = model_validate(raw_kwargs)
 
-            model_dump = getattr(validated_model, "model_dump", None)
-            if not model_dump:
-                await schedule_cmd.finish(f"插件 '{p_name}' 的参数模型不支持导出")
-
-            job_kwargs = model_dump()
+            job_kwargs = model_dump(validated_model)
         except ValidationError as e:
             errors = [f"  - {err['loc'][0]}: {err['msg']}" for err in e.errors()]
             await schedule_cmd.finish(
@@ -220,7 +222,7 @@ async def handle_set(
 
 @schedule_cmd.assign("删除")
 async def handle_delete(targeter: ScheduleTargeter = GetTargeter("删除")):
-    schedules_to_remove: list[ScheduleInfo] = await targeter._get_schedules()
+    schedules_to_remove: list[ScheduledJob] = await targeter._get_schedules()
     if not schedules_to_remove:
         await schedule_cmd.finish("没有找到可删除的任务。")
 
@@ -239,7 +241,7 @@ async def handle_delete(targeter: ScheduleTargeter = GetTargeter("删除")):
 
 @schedule_cmd.assign("暂停")
 async def handle_pause(targeter: ScheduleTargeter = GetTargeter("暂停")):
-    schedules_to_pause: list[ScheduleInfo] = await targeter._get_schedules()
+    schedules_to_pause: list[ScheduledJob] = await targeter._get_schedules()
     if not schedules_to_pause:
         await schedule_cmd.finish("没有找到可暂停的任务。")
 
@@ -258,7 +260,7 @@ async def handle_pause(targeter: ScheduleTargeter = GetTargeter("暂停")):
 
 @schedule_cmd.assign("恢复")
 async def handle_resume(targeter: ScheduleTargeter = GetTargeter("恢复")):
-    schedules_to_resume: list[ScheduleInfo] = await targeter._get_schedules()
+    schedules_to_resume: list[ScheduledJob] = await targeter._get_schedules()
     if not schedules_to_resume:
         await schedule_cmd.finish("没有找到可恢复的任务。")
 

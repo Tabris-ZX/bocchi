@@ -27,26 +27,23 @@ from .llm import (
     LLMException,
     LLMGenerationConfig,
     LLMMessage,
-    analyze,
-    analyze_multimodal,
     chat,
     clear_model_cache,
     code,
     create_multimodal_message,
     embed,
     generate,
+    generate_structured,
     get_cache_stats,
     get_model_instance,
     list_available_models,
     list_embedding_models,
-    pipeline_chat,
     search,
-    search_multimodal,
     set_global_default_model_name,
-    tool_registry,
 )
 from .log import logger
 from .plugin_init import PluginInit, PluginInitManager
+from .renderer import renderer_service
 from .scheduler import scheduler_manager
 
 __all__ = [
@@ -60,8 +57,6 @@ __all__ = [
     "Model",
     "PluginInit",
     "PluginInitManager",
-    "analyze",
-    "analyze_multimodal",
     "chat",
     "clear_model_cache",
     "code",
@@ -69,16 +64,15 @@ __all__ = [
     "disconnect",
     "embed",
     "generate",
+    "generate_structured",
     "get_cache_stats",
     "get_model_instance",
     "list_available_models",
     "list_embedding_models",
     "logger",
-    "pipeline_chat",
+    "renderer_service",
     "scheduler_manager",
     "search",
-    "search_multimodal",
     "set_global_default_model_name",
-    "tool_registry",
     "with_db_timeout",
 ]

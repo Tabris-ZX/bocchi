@@ -13,11 +13,6 @@ from nonebot_plugin_alconna import (
 )
 from nonebot_plugin_uninfo import Uninfo
 
-from bocchi.builtin_plugins.help._config import (
-    GROUP_HELP_PATH,
-    SIMPLE_DETAIL_HELP_IMAGE,
-    SIMPLE_HELP_IMAGE,
-)
 from bocchi.configs.config import Config
 from bocchi.configs.utils import PluginExtraData, RegisterConfig
 from bocchi.services.log import logger
@@ -37,18 +32,6 @@ __plugin_meta__ = PluginMetadata(
         is_show=False,
         configs=[
             RegisterConfig(
-                key="type",
-                value="bocchi",
-                help="帮助图片样式 [normal, HTML, bocchi]",
-                default_value="bocchi",
-            ),
-            RegisterConfig(
-                key="detail_type",
-                value="bocchi",
-                help="帮助详情图片样式 ['normal', 'bocchi']",
-                default_value="bocchi",
-            ),
-            RegisterConfig(
                 key="ENABLE_LLM_HELPER",
                 value=False,
                 help="是否开启LLM智能帮助功能",
@@ -57,9 +40,9 @@ __plugin_meta__ = PluginMetadata(
             ),
             RegisterConfig(
                 key="DEFAULT_LLM_MODEL",
-                value="deepseek-ai/DeepSeek-V3",
+                value="Gemini/gemini-2.5-flash-lite-preview-06-17",
                 help="智能帮助功能使用的默认LLM模型",
-                default_value="deepseek-ai/DeepSeek-V3",
+                default_value="Gemini/gemini-2.5-flash-lite-preview-06-17",
                 type=str,
             ),
             RegisterConfig(
@@ -75,6 +58,13 @@ __plugin_meta__ = PluginMetadata(
                 help="AI帮助回复超过多少字时转为图片发送",
                 default_value=100,
                 type=int,
+            ),
+            RegisterConfig(
+                key="HELP_STYLE",
+                value="default",
+                help="帮助页面的显示样式 (可选值: 'default', 'simple')",
+                default_value="default",
+                type=str,
             ),
         ],
     ).to_dict(),
@@ -144,15 +134,8 @@ async def _(
                 f"查看帮助详情失败，未找到: {name.result}", "帮助", session=session
             )
     elif session.group and (gid := session.group.id):
-        _image_path = GROUP_HELP_PATH / f"{gid}_{is_detail.result}.png"
-        if not _image_path.exists():
-            await create_help_img(session, gid, is_detail.result)
-        await MessageUtils.build_message(_image_path).finish()
+        image_bytes = await create_help_img(session, gid, is_detail.result)
+        await MessageUtils.build_message(image_bytes).finish()
     else:
-        if is_detail.result:
-            _image_path = SIMPLE_DETAIL_HELP_IMAGE
-        else:
-            _image_path = SIMPLE_HELP_IMAGE
-        if not _image_path.exists():
-            await create_help_img(session, None, is_detail.result)
-        await MessageUtils.build_message(_image_path).finish()
+        image_bytes = await create_help_img(session, None, is_detail.result)
+        await MessageUtils.build_message(image_bytes).finish()

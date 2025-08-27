@@ -9,13 +9,13 @@ from bocchi.services.log import logger
 from bocchi.utils.image_utils import BuildImage, ImageTemplate
 
 
-async def call_ban(user_id: str, duration: int = 1):
+async def call_ban(user_id: str, reason: str | None = None, duration: int = 1):
     """调用ban
 
     参数:
         user_id: 用户id
     """
-    await BanConsole.ban(user_id, None, 9, duration * 60)
+    await BanConsole.ban(user_id, None, 9, reason, duration * 60)
     logger.info("被讨厌了，已将用户加入黑名单...", "ban", session=user_id)
 
 
@@ -55,20 +55,26 @@ class BanManage:
             "用户ID",
             "群组ID",
             "BAN LEVEL",
+            "封禁原因",
             "剩余时长(分钟)",
             "操作员ID",
         ]
         row_data = []
         for data in data_list:
-            duration = int((data.ban_time + data.duration - time.time()) / 60)
-            if data.duration < 0:
+            if data.duration == -1:
                 duration = "∞"
+            else:
+                duration = int((data.ban_time + data.duration - time.time()) / 60)
+            if isinstance(duration, int) and duration < 0:
+                await data.delete()
+                continue
             row_data.append(
                 [
                     data.id,
                     data.user_id,
                     data.group_id,
                     data.ban_level,
+                    data.ban_reason,
                     duration,
                     data.operator,
                 ]
@@ -108,7 +114,7 @@ class BanManage:
             is_superuser: 是否为超级用户操作
 
         返回:
-            tuple[bool, str]: 是否unban成功, 群组/用户id或提示
+            tuple[bool, str | Non]: 是否unban成功, 群组/用户id或提示
         """
         user_level = 9999
         if not is_superuser and user_id and session.id1:
@@ -120,10 +126,10 @@ class BanManage:
             if ban_data.ban_level > user_level:
                 return False, "unBan权限等级不足捏..."
             await ban_data.delete()
-            return True, str(ban_data.user_id or ban_data.group_id)
+            return True, ban_data.user_id or ban_data.group_id
         elif await BanConsole.check_ban_level(user_id, group_id, user_level):
             await BanConsole.unban(user_id, group_id)
-            return True, str(group_id)
+            return True, group_id or ""
         return False, "该用户/群组不在黑名单中不足捏..."
 
     @classmethod
@@ -131,6 +137,7 @@ class BanManage:
         cls,
         user_id: str | None,
         group_id: str | None,
+        reason: str | None,
         duration: int,
         session: EventSession,
         is_superuser: bool,
@@ -140,6 +147,7 @@ class BanManage:
         参数:
             user_id: 用户id
             group_id: 群组id
+            reason: 理由
             duration: 时长，秒
             session: Session
             is_superuser: 是否为超级用户操作
@@ -147,4 +155,4 @@ class BanManage:
         level = 9999
         if not is_superuser and user_id and session.id1:
             level = await LevelUser.get_user_level(session.id1, group_id)
-        await BanConsole.ban(user_id, group_id, level, duration, session.id1)
+        await BanConsole.ban(user_id, group_id, level, reason, duration, session.id1)

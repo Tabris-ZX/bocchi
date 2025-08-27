@@ -64,7 +64,7 @@ class ThemeService:
     def _find_font(self, filename: str | None) -> Path | None:
         """
         按优先级在多个位置查找字体文件，并始终返回绝对路径。
-        优先级: 1. 插件内置字体库 -> 2. 真寻全局字体库
+        优先级: 1. 插件内置字体库 -> 2. 波奇全局字体库
         """
         if not filename:
             return None

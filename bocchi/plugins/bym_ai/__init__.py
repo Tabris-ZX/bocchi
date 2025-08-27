@@ -38,7 +38,7 @@ __plugin_meta__ = PluginMetadata(
     name="BYM_AI",
     description=f"{BotConfig.self_nickname}想成为人类...",
     usage=f"""
-    你问小真寻的愿望？
+    你问小波奇的愿望？
     {BotConfig.self_nickname}说她想成为人类！
     """.strip(),
     extra=PluginExtraData(

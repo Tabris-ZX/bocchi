@@ -1,32 +1,26 @@
 import asyncio
-import os
 from pathlib import Path
 from typing import ClassVar
 
 import aiofiles
 import nonebot
 from nonebot.compat import model_dump
-from nonebot_plugin_htmlrender import template_to_pic
+from bocchi import ui
 from pydantic import BaseModel
 
 from bocchi.configs.config import BotConfig, Config
-from bocchi.configs.path_config import DATA_PATH, TEMPLATE_PATH
+from bocchi.configs.path_config import DATA_PATH
 from bocchi.configs.utils.models import PluginExtraData
 from bocchi.models.statistics import Statistics
 from bocchi.models.user_console import UserConsole
 from bocchi.services.log import logger
-from bocchi.utils._build_image import BuildImage
 from bocchi.utils.platform import PlatformUtils
-from nonebot_plugin_uninfo import Interface,get_interface
+from nonebot_plugin_uninfo import get_interface
 
 DIR_PATH = DATA_PATH / "bot_profile"
 
 PROFILE_PATH = DIR_PATH / "profile"
 PROFILE_PATH.mkdir(parents=True, exist_ok=True)
-
-PROFILE_IMAGE_PATH = DIR_PATH / "image"
-PROFILE_IMAGE_PATH.mkdir(parents=True, exist_ok=True)
-
 thanks_users=[
 '775757368',
 '3173096606',
@@ -36,7 +30,6 @@ thanks_users=[
 '3891116983',
 '3480231705'
 ]
-
 
 Config.add_plugin_config(
     "bot_profile",
@@ -77,16 +70,12 @@ class BotProfileManager:
 
     @classmethod
     def clear_profile_image(cls, bot_id: str | None = None):
-        """清除BOT自我介绍图片"""
+        """清除BOT自我介绍的内存缓存"""
         if bot_id:
-            file_path = PROFILE_IMAGE_PATH / f"{bot_id}.png"
-            if file_path.exists():
-                file_path.unlink()
+            if bot_id in cls._bot_data:
+                del cls._bot_data[bot_id]
         else:
-            for f in os.listdir(PROFILE_IMAGE_PATH):
-                _f = PROFILE_IMAGE_PATH / f
-                if _f.is_file():
-                    _f.unlink()
+            cls._bot_data.clear()
 
     @classmethod
     async def _read_profile(cls, bot_id: str):
@@ -157,11 +146,8 @@ class BotProfileManager:
     @classmethod
     async def build_bot_profile_image(
         cls, bot_id: str, tags: list[dict[str, str]] | None = None
-    ) -> Path | None:
+    ) -> bytes | None:
         """构建BOT自我介绍图片"""
-        file_path = PROFILE_IMAGE_PATH / f"{bot_id}.png"
-        if file_path.exists():
-            return file_path
         profile, service_count, call_count = await asyncio.gather(
             cls.get_bot_profile(bot_id),
             UserConsole.get_new_uid(),
@@ -194,31 +180,24 @@ class BotProfileManager:
             users_list.append({
                 "name": name,
                 "avatar": avatar,
-            })
-
-        image_bytes = await template_to_pic(
-            template_path=str((TEMPLATE_PATH / "bot_profile").absolute()),
-            template_name="main.html",
-            templates={
-                "avatar": str(profile.avatar.absolute()) if profile.avatar else None,
-                "bot_name": profile.name,
-                "bot_description": profile.introduction,
-                "service_count": service_count,
-                "call_count": call_count,
-                "plugin_list": cls.get_plugin_profile(),
-                "tags": tags,
-                "title": f"{BotConfig.self_nickname}简介",
-                "thanks_user_list": users_list,
-            },
-            pages={
-                "viewport": {"width": 1077, "height": 1000, "device_scale_factor": 1},
-                "base_url": f"file://{TEMPLATE_PATH}",
-            },
-            wait=5,
+            })    
+        profile_data = {
+            "avatar": str(profile.avatar.absolute()) if profile.avatar else None,
+            "bot_name": profile.name,
+            "bot_description": profile.introduction,
+            "service_count": service_count,
+            "call_count": call_count,
+            "plugin_list": cls.get_plugin_profile(),
+            "tags": tags,
+            "title": f"{BotConfig.self_nickname}简介",
+            "thanks_user_list": users_list,
+        }
+        logger.info(f"感谢名单: {len(users_list)}")
+        return await ui.render_template(
+            "pages/builtin/bot_profile",
+            data=profile_data,
+            use_cache=True,
         )
-        image = BuildImage.open(image_bytes)
-        await image.save(file_path)
-        return file_path
 
 
 BotProfileManager.clear_profile_image()

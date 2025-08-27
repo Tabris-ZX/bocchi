@@ -17,5 +17,4 @@ class ContestConfig(BaseModel, extra=Extra.ignore):
         # "limit": 10,
     }
 
-
 contest_config = ContestConfig.parse_obj(driver.config.dict())

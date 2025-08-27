@@ -1,7 +1,6 @@
 from datetime import datetime
 from pathlib import Path
 import random
-import secrets
 
 from nonebot_plugin_uninfo import Uninfo
 import pytz

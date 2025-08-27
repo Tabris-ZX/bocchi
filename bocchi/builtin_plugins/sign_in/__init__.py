@@ -84,12 +84,6 @@ __plugin_meta__ = PluginMetadata(
                 default_value=0.05,
                 type=float,
             ),
-            RegisterConfig(
-                key="IMAGE_STYLE",
-                value="bocchi",
-                help="签到图片样式, [normal, bocchi]",
-                default_value="bocchi",
-            ),
         ],
         limits=[PluginCdBlock()],
     ).to_dict(),

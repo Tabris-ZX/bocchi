@@ -36,10 +36,10 @@ __plugin_meta__ = PluginMetadata(
     商品操作
     指令：
         商店
-        我的金币/金币
+        我的金币
         我的道具
         使用道具 [名称/Id]
-        购买道具 [名称/Id] ?[数量=1]
+        购买道具 [名称/Id]
         金币排行 ?[num=10]
         金币总排行 ?[num=10]
     """.strip(),
@@ -93,22 +93,8 @@ _use_matcher = on_alconna(
     block=True,
 )
 
-_msg_notice_matcher = on_alconna(
-    Alconna("使用道具0"),
-    aliases={"使用道具1","使用道具2","使用道具3","使用道具4","使用道具5","使用道具6","使用道具7"},
-    priority=5,
-    block=True,
-)
-
 _matcher.shortcut(
     "我的金币",
-    command="商店",
-    arguments=["my-cost"],
-    prefix=True,
-)
-
-_matcher.shortcut(
-    "金币",
     command="商店",
     arguments=["my-cost"],
     prefix=True,
@@ -142,9 +128,6 @@ _matcher.shortcut(
     prefix=True,
 )
 
-@_msg_notice_matcher.handle()
-async def handle_msg_notice():
-    await MessageUtils.build_message("道具id前要加空格的啊~").send()
 
 @_matcher.assign("$main")
 async def _(session: Uninfo, arparma: Arparma):
@@ -224,7 +207,7 @@ async def _(
             await result.finish(reply_to=True)
     except GoodsNotFound:
         await MessageUtils.build_message(
-            f"没有找到道具 {name.result} 或道具数量不足...(购买道具的id和自己道具的id可能不同,建议先用'我的道具'查看一下捏~)"
+            f"没有找到道具 {name.result} 或道具数量不足..."
         ).send(reply_to=True)
     except NotMeetUseConditionsException as e:
         if info := e.get_info():

@@ -4,10 +4,9 @@ from nonebot.permission import SUPERUSER
 from nonebot.plugin import PluginMetadata
 from nonebot.rule import Rule, to_me
 from nonebot_plugin_alconna import Alconna, on_alconna
-from nonebot_plugin_htmlrender import template_to_pic
 
+from bocchi import ui
 from bocchi.configs.config import Config
-from bocchi.configs.path_config import TEMPLATE_PATH
 from bocchi.configs.utils import PluginExtraData, RegisterConfig
 from bocchi.services.log import logger
 from bocchi.utils.enum import PluginType
@@ -67,18 +66,14 @@ _self_check_poke_matcher = on_notice(
 
 async def handle_self_check():
     try:
-        data = await get_status_info()
-        image = await template_to_pic(
-            template_path=str((TEMPLATE_PATH / "check").absolute()),
-            template_name="main.html",
-            templates={"data": data},
-            pages={
-                "viewport": {"width": 195, "height": 750},
-                "base_url": f"file://{TEMPLATE_PATH}",
-            },
-            wait=2,
+        data_dict = await get_status_info()
+
+        image_bytes = await ui.render_template(
+            "pages/builtin/check",
+            data=data_dict,
         )
-        await MessageUtils.build_message(image).send()
+
+        await MessageUtils.build_message(image_bytes).send()
         logger.info("自检成功", "自检")
     except Exception as e:
         await MessageUtils.build_message(f"自检失败: {e}").send()

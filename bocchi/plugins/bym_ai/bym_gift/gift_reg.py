@@ -27,7 +27,7 @@ async def _(user_id: str):
 @gift_register(
     name="小发夹",
     icon="hairpin.png",
-    description=f"这是{BotConfig.self_nickname}的发夹，里面是真寻对你的期望。",
+    description=f"这是{BotConfig.self_nickname}的发夹，里面是波奇对你的期望。",
 )
 async def _(user_id: str):
     rand = random.uniform(0.01, 0.5)

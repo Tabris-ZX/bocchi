@@ -1,7 +1,5 @@
-import os
 from typing import cast
 
-from bocchi.configs.path_config import DATA_PATH, IMAGE_PATH
 from bocchi.models.group_console import GroupConsole
 from bocchi.models.plugin_info import PluginInfo
 from bocchi.models.task_info import TaskInfo
@@ -10,23 +8,6 @@ from bocchi.utils.common_utils import CommonUtils
 from bocchi.utils.enum import BlockType, CacheType, PluginType
 from bocchi.utils.exception import GroupInfoNotFound
 from bocchi.utils.image_utils import BuildImage, ImageTemplate, RowStyle
-
-HELP_FILE = IMAGE_PATH / "SIMPLE_HELP.png"
-
-GROUP_HELP_PATH = DATA_PATH / "group_help"
-
-
-def delete_help_image(gid: str | None = None):
-    """删除帮助图片"""
-    if gid:
-        for file in os.listdir(GROUP_HELP_PATH):
-            if file.startswith(f"{gid}"):
-                os.remove(GROUP_HELP_PATH / file)
-    else:
-        if HELP_FILE.exists():
-            HELP_FILE.unlink()
-        for file in GROUP_HELP_PATH.iterdir():
-            file.unlink()
 
 
 def plugin_row_style(column: str, text: str) -> RowStyle:

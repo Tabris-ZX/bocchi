@@ -1,13 +1,12 @@
-from pathlib import Path
-
 import nonebot
-from nonebot.plugin import PluginMetadata
-from nonebot_plugin_htmlrender import template_to_pic
 from nonebot_plugin_uninfo import Uninfo
 
-from bocchi.configs.config import Config
-from bocchi.configs.path_config import IMAGE_PATH, TEMPLATE_PATH
+from bocchi import ui
+from bocchi.configs.config import BotConfig, Config
+from bocchi.configs.path_config import IMAGE_PATH
 from bocchi.configs.utils import PluginExtraData
+from bocchi.models.bot_console import BotConsole
+from bocchi.models.group_console import GroupConsole
 from bocchi.models.level_user import LevelUser
 from bocchi.models.plugin_info import PluginInfo
 from bocchi.models.statistics import Statistics
@@ -17,58 +16,111 @@ from bocchi.services import (
     generate,
 )
 from bocchi.services.log import logger
-from bocchi.utils._image_template import Markdown
-from bocchi.utils.enum import PluginType
-from bocchi.utils.image_utils import BuildImage, ImageTemplate
-
-from ._config import (
-    GROUP_HELP_PATH,
-    SIMPLE_DETAIL_HELP_IMAGE,
-    SIMPLE_HELP_IMAGE,
-    base_config,
+from bocchi.ui.builders import (
+    InfoCardBuilder,
+    NotebookBuilder,
+    PluginMenuBuilder,
 )
-from .html_help import build_html_image
-from .normal_help import build_normal_image
-from .bocchi_help import build_bocchi_image
+from bocchi.ui.models import PluginMenuCategory
+from bocchi.utils.common_utils import format_usage_for_markdown
+from bocchi.utils.enum import BlockType, PluginType
+from bocchi.utils.platform import PlatformUtils
+from bocchi.utils.pydantic_compat import model_dump
+
+from ._utils import classify_plugin
 
 random_bk_path = IMAGE_PATH / "background" / "help" / "simple_help"
-
 background = IMAGE_PATH / "background" / "0.png"
-
 
 driver = nonebot.get_driver()
 
 
+def _create_plugin_menu_item(
+    bot: BotConsole | None,
+    plugin: PluginInfo,
+    group: GroupConsole | None,
+    is_detail: bool,
+) -> dict:
+    """为插件菜单构造一个插件菜单项数据字典"""
+    status = True
+    has_superuser_help = False
+    nb_plugin = nonebot.get_plugin_by_module_name(plugin.module_path)
+    if nb_plugin and nb_plugin.metadata and nb_plugin.metadata.extra:
+        extra_data = PluginExtraData(**nb_plugin.metadata.extra)
+        if extra_data.superuser_help:
+            has_superuser_help = True
+
+    if not plugin.status:
+        if plugin.block_type == BlockType.ALL:
+            status = False
+        elif group and plugin.block_type == BlockType.GROUP:
+            status = False
+        elif not group and plugin.block_type == BlockType.PRIVATE:
+            status = False
+    elif group and f"{plugin.module}," in group.block_plugin:
+        status = False
+    elif bot and f"{plugin.module}," in bot.block_plugins:
+        status = False
+
+    commands = []
+    if is_detail and nb_plugin and nb_plugin.metadata and nb_plugin.metadata.extra:
+        extra_data = PluginExtraData(**nb_plugin.metadata.extra)
+        commands = [cmd.command for cmd in extra_data.commands]
+
+    return {
+        "id": str(plugin.id),
+        "name": plugin.name,
+        "status": status,
+        "has_superuser_help": has_superuser_help,
+        "commands": commands,
+    }
+
+
 async def create_help_img(
     session: Uninfo, group_id: str | None, is_detail: bool
-) -> Path:
-    """生成帮助图片
+) -> bytes:
+    """使用渲染服务生成帮助图片"""
+    classified_data = await classify_plugin(
+        session, group_id, is_detail, _create_plugin_menu_item
+    )
 
-    参数:
-        session: Uninfo
-        group_id: 群号
-    """
-    help_type = base_config.get("type", "").strip().lower()
+    sorted_categories = dict(
+        sorted(classified_data.items(), key=lambda x: len(x[1]), reverse=True)
+    )
+    categories_for_model = []
+    plugin_count = 0
+    active_count = 0
 
-    match help_type:
-        case "html":
-            result = BuildImage.open(
-                await build_html_image(session, group_id, is_detail)
-            )
-        case "bocchi":
-            result = BuildImage.open(
-                await build_bocchi_image(session, group_id, is_detail)
-            )
-        case _:
-            result = await build_normal_image(group_id, is_detail)
-    if group_id:
-        save_path = GROUP_HELP_PATH / f"{group_id}_{is_detail}.png"
-    elif is_detail:
-        save_path = SIMPLE_DETAIL_HELP_IMAGE
-    else:
-        save_path = SIMPLE_HELP_IMAGE
-    await result.save(save_path)
-    return save_path
+    if sorted_categories:
+        menu_key = next(iter(sorted_categories.keys()))
+        max_data = sorted_categories.pop(menu_key)
+        main_category_name = "主要功能" if menu_key in ["normal", "功能"] else menu_key
+        categories_for_model.append({"name": main_category_name, "items": max_data})
+        plugin_count += len(max_data)
+        active_count += sum(1 for item in max_data if item["status"])
+
+    for menu, value in sorted_categories.items():
+        category_name = "主要功能" if menu in ["normal", "功能"] else menu
+        categories_for_model.append({"name": category_name, "items": value})
+        plugin_count += len(value)
+        active_count += sum(1 for item in value if item["status"])
+
+    platform = PlatformUtils.get_platform(session)
+    bot_id = BotConfig.get_qbot_uid(session.self_id) or session.self_id
+    bot_avatar_url = PlatformUtils.get_user_avatar_url(bot_id, platform) or ""
+
+    builder = PluginMenuBuilder(
+        bot_name=BotConfig.self_nickname,
+        bot_avatar_url=bot_avatar_url,
+        is_detail=is_detail,
+    )
+
+    for category in categories_for_model:
+        builder.add_category(
+            PluginMenuCategory(name=category["name"], items=category["items"])
+        )
+
+    return await ui.render(builder.build())
 
 
 async def get_user_allow_help(user_id: str) -> list[PluginType]:
@@ -92,36 +144,6 @@ async def get_user_allow_help(user_id: str) -> list[PluginType]:
     return type_list
 
 
-async def get_normal_help(
-    metadata: PluginMetadata, extra: PluginExtraData, is_superuser: bool
-) -> str | bytes:
-    """构建默认帮助详情
-
-    参数:
-        metadata: PluginMetadata
-        extra: PluginExtraData
-        is_superuser: 是否超级用户帮助
-
-    返回:
-        str | bytes: 返回信息
-    """
-    items = None
-    if is_superuser:
-        if usage := extra.superuser_help:
-            items = {
-                "简介": metadata.description,
-                "用法": usage,
-            }
-    else:
-        items = {
-            "简介": metadata.description,
-            "用法": metadata.usage,
-        }
-    if items:
-        return (await ImageTemplate.hl_page(metadata.name, items)).pic2bytes()
-    return "该功能没有帮助信息"
-
-
 def min_leading_spaces(str_list: list[str]) -> int:
     min_spaces = 9999
 
@@ -142,45 +164,6 @@ def split_text(text: str):
     return [s.replace(" ", "&nbsp;") for s in split_text]
 
 
-async def get_bocchi_help(
-    module: str, metadata: PluginMetadata, extra: PluginExtraData, is_superuser: bool
-) -> str | bytes:
-    """构建bocchi帮助详情
-
-    参数:
-        module: 模块名
-        metadata: PluginMetadata
-        extra: PluginExtraData
-        is_superuser: 是否超级用户帮助
-
-    返回:
-        str | bytes: 返回信息
-    """
-    call_count = await Statistics.filter(plugin_name=module).count()
-    usage = metadata.usage
-    if is_superuser:
-        if not extra.superuser_help:
-            return "该功能没有超级用户帮助信息"
-        usage = extra.superuser_help
-    return await template_to_pic(
-        template_path=str((TEMPLATE_PATH / "help_detail").absolute()),
-        template_name="main.html",
-        templates={
-            "title": metadata.name,
-            "author": extra.author,
-            "version": extra.version,
-            "call_count": call_count,
-            "descriptions": split_text(metadata.description),
-            "usages": split_text(usage),
-        },
-        pages={
-            "viewport": {"width": 824, "height": 590},
-            "base_url": f"file://{TEMPLATE_PATH}",
-        },
-        wait=2,
-    )
-
-
 async def get_plugin_help(user_id: str, name: str, is_superuser: bool) -> str | bytes:
     """获取功能的帮助信息
 
@@ -196,16 +179,42 @@ async def get_plugin_help(user_id: str, name: str, is_superuser: bool) -> str | 
         plugin = await PluginInfo.get_or_none(
             name__iexact=name, load_status=True, plugin_type__in=type_list
         )
+
     if plugin:
         _plugin = nonebot.get_plugin_by_module_name(plugin.module_path)
         if _plugin and _plugin.metadata:
             extra_data = PluginExtraData(**_plugin.metadata.extra)
-            if Config.get_config("help", "detail_type") == "bocchi":
-                return await get_bocchi_help(
-                    plugin.module, _plugin.metadata, extra_data, is_superuser
-                )
-            else:
-                return await get_normal_help(_plugin.metadata, extra_data, is_superuser)
+
+            call_count = await Statistics.filter(plugin_name=plugin.module).count()
+            usage = _plugin.metadata.usage
+            if is_superuser:
+                if not extra_data.superuser_help:
+                    return "该功能没有超级用户帮助信息"
+                usage = extra_data.superuser_help
+
+            builder = InfoCardBuilder(title=_plugin.metadata.name)
+
+            builder.add_metadata_items(
+                [
+                    ("作者", extra_data.author or "未知"),
+                    ("版本", extra_data.version or "未知"),
+                    ("调用次数", call_count),
+                ]
+            )
+
+            processed_description = format_usage_for_markdown(
+                _plugin.metadata.description.strip()
+            )
+            processed_usage = format_usage_for_markdown(usage.strip())
+
+            builder.add_section("简介", [processed_description])
+            builder.add_section("使用方法", [processed_usage])
+
+            style_name = Config.get_config("help", "HELP_STYLE", "default")
+            render_dict = model_dump(builder._data)
+            render_dict["style_name"] = style_name
+
+            return await ui.render_template("pages/builtin/help", data=render_dict)
         return "糟糕! 该功能没有帮助喔..."
     return "没有查找到这个功能噢..."
 
@@ -282,10 +291,12 @@ async def get_llm_help(question: str, user_id: str) -> str | bytes:
 
         reply_text = response.text if response else "抱歉，我暂时无法回答这个问题。"
         threshold = Config.get_config("help", "LLM_HELPER_REPLY_AS_IMAGE_THRESHOLD", 50)
+
         if len(reply_text) > threshold:
-            markdown = Markdown()
-            markdown.text(reply_text)
-            return await markdown.build()
+            builder = NotebookBuilder()
+            builder.text(reply_text)
+            return await ui.render(builder.build())
+
         return reply_text
 
     except LLMException as e:

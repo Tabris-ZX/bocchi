@@ -5,7 +5,7 @@ from nonebot_plugin_alconna import Alconna, Args, Arparma, At, Match, on_alconna
 from nonebot_plugin_uninfo import Uninfo
 from playwright.async_api import TimeoutError
 from bocchi.models.user_console import UserConsole
-from backup.utils.enum import GoldHandle
+from bocchi.utils.enum import GoldHandle
 from bocchi.configs.utils import Command, PluginExtraData
 from bocchi.models.group_member_info import GroupInfoUser
 from bocchi.services.log import logger

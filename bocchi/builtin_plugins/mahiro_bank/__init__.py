@@ -6,6 +6,7 @@ from nonebot_plugin_apscheduler import scheduler
 from nonebot_plugin_uninfo import Uninfo
 from nonebot_plugin_waiter import prompt_until
 
+from bocchi import ui
 from bocchi.configs.utils import PluginExtraData, RegisterConfig
 from bocchi.services.log import logger
 from bocchi.utils.depends import UserName
@@ -188,15 +189,33 @@ async def _(session: Uninfo, arparma: Arparma, amount: Match[int]):
 
 @_matcher.assign("user-info")
 async def _(session: Uninfo, arparma: Arparma, uname: str = UserName()):
-    result = await BankManager.get_user_info(session, uname)
-    await MessageUtils.build_message(result).send()
+    user_payload = await BankManager.get_user_info_data(session, uname)
+
+    render_data = {"page_type": "user", "payload": user_payload}
+
+    image_bytes = await ui.render_template(
+        "pages/builtin/mahiro_bank",
+        data=render_data,
+        viewport={"width": 386, "height": 10},
+    )
+
+    await MessageUtils.build_message(image_bytes).send()
     logger.info("查看银行个人信息", arparma.header_result, session=session)
 
 
 @_matcher.assign("bank-info")
 async def _(session: Uninfo, arparma: Arparma):
-    result = await BankManager.get_bank_info()
-    await MessageUtils.build_message(result).send()
+    overview_payload = await BankManager.get_bank_info_data()
+
+    render_data = {"page_type": "overview", "payload": overview_payload}
+
+    image_bytes = await ui.render_template(
+        "pages/builtin/mahiro_bank",
+        data=render_data,
+        viewport={"width": 450, "height": 10},
+    )
+
+    await MessageUtils.build_message(image_bytes).send()
     logger.info("查看银行信息", arparma.header_result, session=session)
 
 

@@ -4,7 +4,6 @@ from bocchi.utils.http_utils import AsyncHttpx
 
 from .const import (
     ARCHIVE_URL_FORMAT,
-    GITEE_RAW_CONTENT_FORMAT,
     RAW_CONTENT_FORMAT,
     RELEASE_ASSETS_FORMAT,
     RELEASE_SOURCE_FORMAT,
@@ -22,7 +21,6 @@ async def __get_fastest_formats(formats: dict[str, str]) -> list[str]:
 async def get_fastest_raw_formats() -> list[str]:
     """获取最快的raw下载地址格式"""
     formats: dict[str, str] = {
-        "https://gitee.com/": GITEE_RAW_CONTENT_FORMAT,
         "https://raw.githubusercontent.com/": RAW_CONTENT_FORMAT,
         "https://ghproxy.cc/": f"https://ghproxy.cc/{RAW_CONTENT_FORMAT}",
         "https://gh-proxy.com/": f"https://gh-proxy.com/{RAW_CONTENT_FORMAT}",
@@ -57,6 +55,7 @@ async def get_fastest_release_formats() -> list[str]:
 async def get_fastest_release_source_formats() -> list[str]:
     """获取最快的发行版源码下载地址格式"""
     formats: dict[str, str] = {
+        "https://github.bibk.top": "https://github.bibk.top/{owner}/{repo}/releases/download/{version}/{filename}",
         "https://codeload.github.com/": RELEASE_SOURCE_FORMAT,
         "https://p.102333.xyz/": f"https://p.102333.xyz/{RELEASE_SOURCE_FORMAT}",
     }

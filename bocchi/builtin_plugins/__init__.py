@@ -17,7 +17,7 @@ from bocchi.models.user_console import UserConsole
 from bocchi.services.log import logger
 from bocchi.utils.decorator.shop import shop_register
 from bocchi.utils.manager.priority_manager import PriorityLifecycle
-from bocchi.utils.manager.resource_manager import ResourceManager
+from bocchi.utils.manager.bocchi_repo_manager import bocchiRepoManager
 from bocchi.utils.platform import PlatformUtils
 
 driver: Driver = nonebot.get_driver()
@@ -85,7 +85,8 @@ from bag_users t1
 
 @PriorityLifecycle.on_startup(priority=5)
 async def _():
-    await ResourceManager.init_resources()
+    if not bocchiRepoManager.check_resources_exists():
+        await bocchiRepoManager.resources_update()
     """签到与用户的数据迁移"""
     if goods_list := await GoodsInfo.filter(uuid__isnull=True).all():
         for goods in goods_list:

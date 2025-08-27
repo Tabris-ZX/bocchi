@@ -48,13 +48,14 @@ nonebot-plugin-waiter = "^0.8.1"
 multidict = ">=6.0.0,!=6.3.2"
 
 redis = { version = ">=5", optional = true }
-asyncpg = { version = ">=0.20.0", optional = true }
 alibabacloud-devops20210625 = "^5.0.2"
 nonebot-plugin-imageutils = "^0.1.17"
 nonebot-plugin-matchreminder = "^1.0.4"
 nonebot-plugin-memes = "^0.8.1"
 jwt = "^1.4.0"
 curl-cffi = "^0.13.0"
+asyncpg = "^0.30.0"
+tqdm = "^4.67.1"
 
 [tool.poetry.group.dev.dependencies]
 nonebug = "^0.4"

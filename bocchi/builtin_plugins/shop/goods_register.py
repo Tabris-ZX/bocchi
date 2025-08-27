@@ -1,6 +1,4 @@
 import random
-
-from bocchi.plugins.send_setu_.send_setu._data_source import SetuManage
 from bocchi.utils.enum import GoldHandle
 from bocchi.models.user_console import UserConsole
 from bocchi.utils.decorator.shop import shop_register, NotMeetUseConditionsException
@@ -51,6 +49,7 @@ async def _(user_id: str):
             return f"盲盒打开了...还不错！你获得了 {gained_gold} 金币！💰"
     
     elif open_chance < 65:
+        from bocchi.plugins.setu.send_setu import SetuManage
         setu_list = await SetuManage.get_setu(num=1, local = True)
         if isinstance(setu_list, str):
             return "盲盒打开了...获得了一张色图!🎁...但是发生了一些意外,色图没发出来啦~"

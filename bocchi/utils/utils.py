@@ -64,6 +64,25 @@ class ResourceDirManager:
             cls.__tree_append(path, deep)
 
 
+def is_binary_file(file_path: str) -> bool:
+    """判断是否为二进制文件"""
+    binary_extensions = {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".bmp",
+        ".ico",
+        ".pdf",
+        ".zip",
+        ".rar",
+        ".7z",
+        ".exe",
+        ".dll",
+    }
+    return any(file_path.lower().endswith(ext) for ext in binary_extensions)
+
+
 def cn2py(word: str) -> str:
     """将字符串转化为拼音
 
@@ -127,11 +146,10 @@ def change_pixiv_image_links(
         nginx_url = Config.get_config("pixiv", "PIXIV_NGINX_URL")
     if nginx_url:
         url = (
-            url.replace("pixiv.cat", nginx_url)
-            .replace("pixiviz.xyz", nginx_url)
-            .replace("pixiv.js.org", nginx_url)
-            .replace("_webp", "")
+            url.replace("i.pximg.net", nginx_url)
+            .replace("i.pixiv.cat", nginx_url)
             .replace("i.pixiv.re", nginx_url)
+            .replace("_webp", "")
         )
     return url
 

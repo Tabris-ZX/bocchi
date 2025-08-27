@@ -1,20 +1,21 @@
 from datetime import datetime, timedelta
 import random
 import json
-import aiofiles
-from nonebot_plugin_htmlrender import template_to_pic
+
 from nonebot_plugin_uninfo import Uninfo
 from tortoise.expressions import RawSQL
 from tortoise.functions import Count
 
-from backup.services import logger
-from bocchi.configs.path_config import TEMPLATE_PATH, DATA_PATH
+from bocchi import ui
 from bocchi.models.chat_history import ChatHistory
 from bocchi.models.level_user import LevelUser
 from bocchi.models.sign_user import SignUser
 from bocchi.models.statistics import Statistics
 from bocchi.models.user_console import UserConsole
 from bocchi.utils.platform import PlatformUtils
+from bocchi.configs.path_config import DATA_PATH
+import aiofiles
+from bocchi.services.log import logger
 
 USER_PATH = DATA_PATH / "my_info"
 RACE = [
@@ -92,8 +93,8 @@ def get_level(impression: float) -> int:
 
 
 async def get_chat_history(
-        user_id: str, group_id: str | None
-) -> tuple[list[str], list[str]]:
+    user_id: str, group_id: str | None
+) -> tuple[list[str], list[int]]:
     """获取用户聊天记录
 
     参数:
@@ -101,11 +102,11 @@ async def get_chat_history(
         group_id: 群id
 
     返回:
-        tuple[list[str], list[str]]: 日期列表, 次数列表
+        tuple[list[str], list[int]]: 日期列表, 次数列表
 
     """
     now = datetime.now()
-    filter_date = now - timedelta(days=7, hours=now.hour, minutes=now.minute)
+    filter_date = now - timedelta(days=7)
     date_list = (
         await ChatHistory.filter(
             user_id=user_id, group_id=group_id, create_time__gte=filter_date
@@ -114,19 +115,15 @@ async def get_chat_history(
         .group_by("date")
         .values("date", "count")
     )
-    chart_date = []
-    count_list = []
-    date2cnt = {str(date["date"]): date["count"] for date in date_list}
-    date = now.date()
+    chart_date: list[str] = []
+    count_list: list[int] = []
+    date2cnt = {str(item["date"]): item["count"] for item in date_list}
+    current_date = now.date()
     for _ in range(7):
-        if str(date) in date2cnt:
-            count_list.append(date2cnt[str(date)])
-        else:
-            count_list.append(0)
-        chart_date.append(str(date))
-        date -= timedelta(days=1)
-    for c in chart_date:
-        chart_date[chart_date.index(c)] = c[5:]
+        date_str = str(current_date)
+        count_list.append(date2cnt.get(date_str, 0))
+        chart_date.append(date_str[5:])
+        current_date -= timedelta(days=1)
     chart_date.reverse()
     count_list.reverse()
     return chart_date, count_list
@@ -135,18 +132,8 @@ async def get_chat_history(
 async def get_user_info(
         session: Uninfo, user_id: str, group_id: str | None, nickname: str
 ) -> bytes:
-    """获取用户个人信息
+    """获取用户个人信息"""
 
-    参数:
-        session: Uninfo
-        bot: Bot
-        user_id: 用户id
-        group_id: 群id
-        nickname: 用户昵称
-
-    返回:
-        bytes: 图片数据
-    """
     platform = PlatformUtils.get_platform(session) or "qq"
     ava_url = PlatformUtils.get_user_avatar_url(user_id, platform, session.self_id)
     user = await UserConsole.get_user(user_id, platform)
@@ -160,53 +147,63 @@ async def get_user_info(
     select_index[sign_level] = "select"
     uid = f"{user.uid}".rjust(8, "0")
     uid = f"{uid[:4]} {uid[4:]}"
+
     now = datetime.now()
     weather = "moon" if now.hour < 6 or now.hour > 19 else "sun"
     chart_date, count_list = await get_chat_history(user_id, group_id)
-    data = {
-        "date": now.date(),
-        "weather": weather,
-        "ava_url": ava_url,
-        "nickname": nickname,
-        "title": "勇 者",
-        "race": random.choice(RACE),
-        "sex": random.choice(SEX),
-        "occ": random.choice(OCC),
-        "uid": uid,
-        "description": "这是一个传奇的故事，"
-                       "人类的赞歌是勇气的赞歌,人类的伟大是勇气的伟译。",
-        "sign_level": sign_level,
-        "level": level,
-        "gold": user.gold,
-        "prop": len(user.props),
-        "call": stat_count,
-        "say": chat_count,
-        "select_index": select_index,
-        "chart_date": chart_date,
-        "count_list": count_list,
+
+    profile_data = {
+        "page": {
+            "date": str(now.date()),
+            "weather_icon_name": weather,
+        },
+        "info": {  # ⚠️ 注意：这里和 template.json 对齐
+            "avatar_url": ava_url,
+            "nickname": nickname,
+            "title": "勇 者",
+            "race": random.choice(RACE),
+            "sex": random.choice(SEX),
+            "occupation": random.choice(OCC),
+            "uid": uid,
+            "description": (
+                "你还没有个人简介捏,快去设置吧!"
+            ),
+        },
+        "stats": {
+            "gold": user.gold,
+            "prop_count": len(user.props),
+            "call_count": stat_count,
+            "chat_count": chat_count,
+        },
+        "favorability": {
+            "level": sign_level,
+            "selected_indices": select_index,
+        },
+        "permission_level": level,
+        "chart": {
+            "labels": chart_date,
+            "data": count_list,
+        },
     }
+
     appoint = USER_PATH / "appointed" / f"{user_id}.json"
     if appoint.exists():
         with appoint.open("r", encoding="utf-8") as f:
             update = json.load(f)
-            for key, value in update.items():
-                if value != "":
-                    data[key] = value
+            # ⚠️ 修改点：update 文件中是 {"info": {...}} 结构
+            if "info" in update:
+                for key, value in update["info"].items():
+                    if value != "":
+                        profile_data["info"][key] = value
 
-    return await template_to_pic(
-        template_path=str((TEMPLATE_PATH / "my_info").absolute()),
-        template_name="main.html",
-        templates={"data": data},
-        pages={
-            "viewport": {"width": 1754, "height": 1240},
-            "base_url": f"file://{TEMPLATE_PATH}",
-        },
-        wait=2,
-    )
+    return await ui.render_template("pages/builtin/my_info", data=profile_data)
+
 
 async def update_info(user_id: str, **update) -> bool:
+    """更新用户信息"""
     user_info = USER_PATH / "appointed" / f"{user_id}.json"
     user_info.parent.mkdir(parents=True, exist_ok=True)
+
     temp = {}
     if user_info.exists():
         async with aiofiles.open(user_info, mode='r', encoding='utf-8') as f:
@@ -223,7 +220,13 @@ async def update_info(user_id: str, **update) -> bool:
             except json.decoder.JSONDecodeError:
                 logger.error("修改信息格式错误")
                 return False
-    temp.update(update)
+
+    # ⚠️ 修改点：update 的内容要写入 temp["info"] 而不是 temp 本身
+    if "info" not in temp:
+        temp["info"] = {}
+
+    temp["info"].update(update)  # 只更新 info 里面的字段
+
     async with aiofiles.open(user_info, 'w', encoding='utf-8') as f:
         await f.write(json.dumps(temp, ensure_ascii=False, indent=4))
         return True

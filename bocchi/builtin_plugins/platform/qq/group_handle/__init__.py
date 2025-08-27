@@ -16,6 +16,7 @@ from bocchi.configs.config import BotConfig, Config
 from bocchi.configs.utils import PluginExtraData, RegisterConfig, Task
 from bocchi.models.event_log import EventLog
 from bocchi.models.group_console import GroupConsole
+from bocchi.services.cache import CacheRoot
 from bocchi.utils.common_utils import CommonUtils
 from bocchi.utils.enum import EventLogType, PluginType
 from bocchi.utils.platform import PlatformUtils
@@ -92,6 +93,10 @@ group_decrease_handle = on_notice(
 )
 """群员减少处理"""
 
+cache = CacheRoot.cache_dict(
+    "REQUEST_CACHE", (base_config.get("TIP_MESSAGE_LIMIT") or 360) * 60, str
+)
+
 
 @group_increase_handle.handle()
 async def _(
@@ -109,7 +114,9 @@ async def _(
                 bot, str(event.operator_id), str(event.group_id), group
             )
         except ForceAddGroupError as e:
-            await PlatformUtils.send_superuser(bot, e.get_info())
+            if not cache.get(e.get_group_id()):
+                cache.set(e.get_group_id(), "1")
+                await PlatformUtils.send_superuser(bot, e.get_info())
     else:
         await GroupManager.add_user(session, bot)
 
