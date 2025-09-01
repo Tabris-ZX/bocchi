@@ -11,34 +11,34 @@ from PIL import Image
 import io
 import base64
 
-def compress_image(img_bytes: bytes,max_size=(2048, 2048),target_kb=1024,min_quality=50) -> str:
-    """
-    将任意图片 bytes 压缩到 Gemini 2.5 可接受的大小，并返回 Base64 字符串。
+# def compress_image(img_bytes: bytes,max_size=(2048, 2048),target_kb=1024,min_quality=50) -> str:
+#     """
+#     将任意图片 bytes 压缩到 Gemini 2.5 可接受的大小，并返回 Base64 字符串。
 
-    参数:
-        img_bytes: 原始图片 bytes
-        max_size: 最大宽高 (width, height)
-        target_kb: 压缩目标大小，KB
-        min_quality: 最低 JPEG 质量
+#     参数:
+#         img_bytes: 原始图片 bytes
+#         max_size: 最大宽高 (width, height)
+#         target_kb: 压缩目标大小，KB
+#         min_quality: 最低 JPEG 质量
 
-    返回:
-        base64 字符串，可直接用于 image_url
-    """
-    with Image.open(io.BytesIO(img_bytes)) as img:
-        img.thumbnail(max_size)
-        quality = 90
-        output = io.BytesIO()
-        img.save(output, format="JPEG", quality=quality)
-        data = output.getvalue()
+#     返回:
+#         base64 字符串，可直接用于 image_url
+#     """
+#     with Image.open(io.BytesIO(img_bytes)) as img:
+#         img.thumbnail(max_size)
+#         quality = 90
+#         output = io.BytesIO()
+#         img.save(output, format="JPEG", quality=quality)
+#         data = output.getvalue()
 
-        # 循环压缩直到小于目标大小或达到最小质量
-        while len(data) > target_kb * 1024 and quality > min_quality:
-            quality -= 5
-            output = io.BytesIO()
-            img.save(output, format="JPEG", quality=quality)
-            data = output.getvalue()
+#         # 循环压缩直到小于目标大小或达到最小质量
+#         while len(data) > target_kb * 1024 and quality > min_quality:
+#             quality -= 5
+#             output = io.BytesIO()
+#             img.save(output, format="JPEG", quality=quality)
+#             data = output.getvalue()
 
-        return base64.b64encode(data).decode("utf-8")
+#         return base64.b64encode(data).decode("utf-8")
 
 
 
@@ -68,7 +68,7 @@ async def normal_build_pvc(img: bytes) -> bytes|None:
                     ]
         }],
         "generation_config": {
-            "response_modalities": ["TEXT", "IMAGE"]
+            "response_modalities": ["IMAGE"]
         }
     }
 
@@ -124,7 +124,7 @@ async def advanced_build_pvc(img: bytes) -> bytes | int:
     }
 
     if isinstance(img, bytes):
-        img_data = compress_image(img)
+        img_data = base64.b64encode(img).decode("utf-8")
         image_content = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_data}"}}
 
     payload = {
