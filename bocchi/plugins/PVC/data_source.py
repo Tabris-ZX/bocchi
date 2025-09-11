@@ -1,45 +1,10 @@
-from time import sleep
+
 import requests
 import json
 import base64
 import httpx  # 异步 HTTP 库，可换成你现有的 AsyncHttpx
 from bocchi.services.log import logger
-from bocchi.utils.http_utils import AsyncHttpx
-from .config import normal_config,advanced_config
-
-from PIL import Image
-import io
-import base64
-
-# def compress_image(img_bytes: bytes,max_size=(2048, 2048),target_kb=1024,min_quality=50) -> str:
-#     """
-#     将任意图片 bytes 压缩到 Gemini 2.5 可接受的大小，并返回 Base64 字符串。
-
-#     参数:
-#         img_bytes: 原始图片 bytes
-#         max_size: 最大宽高 (width, height)
-#         target_kb: 压缩目标大小，KB
-#         min_quality: 最低 JPEG 质量
-
-#     返回:
-#         base64 字符串，可直接用于 image_url
-#     """
-#     with Image.open(io.BytesIO(img_bytes)) as img:
-#         img.thumbnail(max_size)
-#         quality = 90
-#         output = io.BytesIO()
-#         img.save(output, format="JPEG", quality=quality)
-#         data = output.getvalue()
-
-#         # 循环压缩直到小于目标大小或达到最小质量
-#         while len(data) > target_kb * 1024 and quality > min_quality:
-#             quality -= 5
-#             output = io.BytesIO()
-#             img.save(output, format="JPEG", quality=quality)
-#             data = output.getvalue()
-
-#         return base64.b64encode(data).decode("utf-8")
-
+from .config import normal_config,img_builder_config
 
 
 async def normal_build_pvc(img: bytes) -> bytes|None:
@@ -117,9 +82,9 @@ async def normal_build_pvc(img: bytes) -> bytes|None:
         logger.error(f"PVC API错误信息: {response.text}", "PVC")
         return None
 
-async def advanced_build_pvc(img: bytes) -> bytes | int:
+async def build_img(img: bytes,prompt: str) -> bytes | int:
     headers = {
-        "Authorization": f"Bearer {advanced_config.get_api_key()}",
+        "Authorization": f"Bearer {img_builder_config.get_api_key()}",
         "Content-Type": "application/json"
     }
 
@@ -128,12 +93,12 @@ async def advanced_build_pvc(img: bytes) -> bytes | int:
         image_content = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_data}"}}
 
     payload = {
-        "model": "google/gemini-2.5-flash-image-preview:free",
+        "model": img_builder_config.model,
         "messages": [
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": advanced_config.prompt},
+                    {"type": "text", "text": prompt},
                     image_content
                 ],
             }
@@ -141,7 +106,7 @@ async def advanced_build_pvc(img: bytes) -> bytes | int:
         "extra_body": {}
     }
     try:
-        response = requests.post(advanced_config.base_url, headers=headers, json=payload)
+        response = requests.post(img_builder_config.base_url, headers=headers, json=payload)
         logger.info(f"OpenRouter 状态码: {response.status_code}", "PVC")
         if response.status_code == 200:
             result = response.json()

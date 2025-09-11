@@ -9,16 +9,16 @@ class NJUIT_Config(BaseModel):
     xg_headers: dict[str,str]= {
       "Host": "api.zxs-bbs.cn",
       "Connection": "keep-alive",
+      "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0ZW5hbnRJZCI6OSwic2Nob29sSUQiOjEwNzU3LCJzY2hvb2wiOiJcdTUzNTdcdTRlYWNcdTVkZTVcdTRlMWFcdTgwNGNcdTRlMWFcdTYyODBcdTY3MmZcdTU5MjdcdTViNjYiLCJ1dWlkIjo5NTQ0ODA2MTAsImlhdCI6MTc1NzU1NTU3MywiZXhwIjoxNzYwMTQ3NTczfQ.YnoP61kMtxnUNr4CCkLFQPer7AWfx1EqzKu0iGmjjA7jhyXxJUtXXbMA4kJwdUFr--X_C8MqsD69w5-Op7GTogppRv2WiOsHRhzTOVUmlUsjdazk55DQSo7cVC8GPvZJeIRQ0gJ_5bMDjDF59Aka87nDWoMxmh19bAlgpaNZfkA",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090a13) UnifiedPCWindowsWechat(0xf254101e) XWEB/16389",
       "xweb_xhr": "1",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090a13) UnifiedPCWindowsWechat(0xf254061a) XWEB/14307",
-      "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0ZW5hbnRJZCI6OSwic2Nob29sSUQiOjEwNzU3LCJzY2hvb2wiOiJcdTUzNTdcdTRlYWNcdTVkZTVcdTRlMWFcdTgwNGNcdTRlMWFcdTYyODBcdTY3MmZcdTU5MjdcdTViNjYiLCJ1dWlkIjo5NTQ0ODA2MTAsImlhdCI6MTc1NDMxNDU3OCwiZXhwIjoxNzU2OTA2NTc4fQ.tiaG9UvJhg-rgvRKiWs_KjgmpcP8gEvaFFw21woqhr_X_EXtUC24Kv1cTAJoZiCiEqytmyV-nhfpmgBHqLdY5gOoQRDks2AfYE6Ob5KYykFZIyYyLLYjxiStRxMMq9fX2V7z7m9p4QZ17hNzmyAjAlkIxLhZ6Rn0oqIEXVrCSXY",
-      "Tenant": "9",
       "Content-Type": "application/json",
+      "Tenant": "9",
       "Accept": "*/*",
       "Sec-Fetch-Site": "cross-site",
       "Sec-Fetch-Mode": "cors",
       "Sec-Fetch-Dest": "empty",
-      "Referer": "https://servicewechat.com/wx4380f8ff50924d52/38/page-frame.html",
+      "Referer": "https://servicewechat.com/wx4380f8ff50924d52/41/page-frame.html",
       "Accept-Encoding": "gzip, deflate, br",
       "Accept-Language": "zh-CN,zh;q=0.9"
     }
@@ -37,4 +37,4 @@ class NJUIT_Config(BaseModel):
     }
     bill_url:str = "http://wxjf.niit.edu.cn/wechat/elec/recharge?"
 
-njuit_config = NJUIT_Config.parse_obj(driver.config.dict())
+njuit_config = NJUIT_Config()

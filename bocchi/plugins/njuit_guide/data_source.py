@@ -47,10 +47,6 @@ class DataSource:
                 )
                 page = await context.new_page()
                 
-                # 关键修改2：确保传递的 HTML 包含完整的移动端 meta 标签
-                if not isinstance(html_content, str):
-                    html_content = str(html_content)
-                
                 # 强制注入移动端 meta 标签（如果原 HTML 没有）
                 if "<meta name=\"viewport\"" not in html_content:
                     html_content = html_content.replace(

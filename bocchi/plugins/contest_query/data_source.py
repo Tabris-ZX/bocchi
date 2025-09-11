@@ -81,12 +81,6 @@ class DataSource:
         # 方式1：设置默认超时（推荐）
         timeout = httpx.Timeout(10.0)  # 所有操作10秒超时
 
-        # 方式2：明确指定所有参数
-        # timeout = httpx.Timeout(connect=3.0, read=15.0, write=10.0, pool=5.0)
-
-        # 方式3：设置默认+覆盖特定参数
-        # timeout = httpx.Timeout(10.0, connect=3.0)
-
         for attempt in range(3):
             try:
                 async with httpx.AsyncClient(timeout=timeout) as client:

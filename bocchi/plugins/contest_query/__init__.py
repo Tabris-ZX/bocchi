@@ -39,7 +39,7 @@ __plugin_meta__ = PluginMetadata(
     extra=PluginExtraData(
         author="Tabris_ZX",
         version="1.0",
-        tasks=[Task(module="today_match", name="今日算法比赛")],
+        # tasks=[Task(module="today_match", name="今日算法比赛")],
     ).to_dict(),
 )
 
@@ -135,12 +135,6 @@ remind_matches = on_alconna(
     priority=5,
     block=True,
 )
-
-# @remind_matches.handle()
-# async def handle_remind_matcher():
-#     msg = await DataSource.ans_remind()
-#     await remind_matches.finish(msg)
-
 
 # 每日定时任务
 async def check(bot: Bot, group_id: str) -> bool:
