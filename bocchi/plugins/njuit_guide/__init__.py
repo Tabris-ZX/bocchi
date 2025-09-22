@@ -1,19 +1,21 @@
 from arclet.alconna import Args, Option
+from nonebot import get_bot
 from nonebot.adapters import Bot
 from nonebot.permission import SUPERUSER
 from nonebot.plugin import PluginMetadata
 from nonebot_plugin_uninfo import Uninfo
 
-from ...utils.enum import GoldHandle
+from bocchi.utils.enum import GoldHandle
 
-from ...models.user_console import UserConsole
+from bocchi.models.user_console import UserConsole
 from .data_source import DataSource
+from .electricity import ElectricityService
 from bocchi.configs.utils import BaseBlock, Command, PluginExtraData
 from bocchi.services.log import logger
 from bocchi.utils.message import MessageUtils
 from nonebot.plugin import PluginMetadata
 from nonebot_plugin_alconna import Alconna, on_alconna
-
+from nonebot.adapters.onebot.v11 import MessageSegment
 from bocchi.configs.path_config import DATA_PATH
 from bocchi.configs.utils import PluginExtraData
 from bocchi.services.log import logger
@@ -23,9 +25,10 @@ from nonebot_plugin_apscheduler import scheduler
 from bocchi.configs.utils import PluginExtraData, Task
 from bocchi.services.log import logger
 from .data_source import DataSource
-from ...utils.common_utils import CommonUtils
+from bocchi.utils.common_utils import CommonUtils
 from ...utils.platform import broadcast_group
-from .config import njuit_config
+from .config import njuit_config as conf
+from .model import NjuitStu
 
 __plugin_meta__ = PluginMetadata(
     name="南工指北",
@@ -35,28 +38,35 @@ __plugin_meta__ = PluginMetadata(
         南工新生: 获取新生指南pdf
         南工地图: 南工院彩绘地图
         南工官网: 学校官网
+
         校果 ?[帖子数=10] ?[评论数=10]: 查询最新n条校果论坛帖子
         校果热榜: 查询校果论坛热榜帖子
-        账号绑定 ?{宿舍}[宿舍号] ?{班级}[班级名]: 绑定qq账户和你的宿舍/班级(如果担心泄露隐私,可以私聊作者绑定) 
+        
+        账号绑定 ?dorm [宿舍号] ?class [班级名]: 绑定qq账户和你的宿舍/班级
+        (建议私聊小波奇绑定以保护隐私) 
         电费查询: 查询已绑定宿舍的电费余额
+        电费推送 开/关: 开启或关闭每日早上8点电费余额推送
+        
         如: 校果 5
-            账号绑定 宿舍 123456
+            账号绑定 dorm 123456
+            电费推送 开
     todo:
-        电费余量不足预警
         快捷课表查询
-        请假快速通知导员审批
-        学生随机匹配
 
     还要做什么功能可以和作者提建议...
     """.strip(),
     extra=PluginExtraData(
         author="Tabris_ZX",
-        version="0.4",
-        tasks=[Task(module="today_xiaoguo", name="今日校果")],
+        version="0.5.1",
+        tasks=[
+            Task(module="today_xiaoguo", name="今日校果"), 
+            Task(module="today_bill_push", name="今日电费提醒")
+        ],
     ).to_dict(),
 )
 
-NJUIT_PATH = DATA_PATH / "njuit_guide"
+FILE_PATH = DATA_PATH / "njuit_guide"
+
 
 fm_matcher = on_alconna(
     Alconna("南工新生"),
@@ -76,25 +86,25 @@ ow_matcher = on_alconna(
 bind_matcher = on_alconna(
     Alconna(
         "账号绑定",
-        Option("班级", Args["class_name", str, ""]),
-        Option("宿舍", Args["dorm_id", str, ""]),
+        Option("class", Args["class_name", str, ""]),
+        Option("dorm", Args["dorm_id", str, ""]),
     ),
     priority=5,
     block=True,
 )
-zx_bind_matcher = on_alconna(
-    Alconna(
-        "账号绑定",
-        Args["user_id", str],
-        Option("班级", Args["class_name", str, ""]),
-        Option("宿舍", Args["dorm_id", str, ""]),
-    ),
-    permission=SUPERUSER,
-    priority=5,
-    block=True,
-)
+
 query_matcher = on_alconna(
     Alconna("电费查询"),
+    aliases={"查询电费","宿舍电费"},
+    priority=5,
+    block=True,
+)
+
+push_matcher = on_alconna(
+    Alconna(
+        "电费推送",
+        Args["action", str],
+    ),
     priority=5,
     block=True,
 )
@@ -102,8 +112,8 @@ query_matcher = on_alconna(
 xg_latest_matcher = on_alconna(
     Alconna(
         "校果",
-        Args["tp_num?", int, njuit_config.topic_num],
-        Args["cmt_num?", int, njuit_config.comment_num],
+        Args["tp_num?", int, conf.topic_num],
+        Args["cmt_num?", int, conf.comment_num],
     ),
     priority=5,
     block=True,
@@ -116,7 +126,7 @@ xg_hot_matcher = on_alconna(
 
 @xg_latest_matcher.handle()
 async def _(tp_num: int, cmt_num: int):
-    img = await DataSource.get_topics(tp_num=tp_num, cmt_num=cmt_num,url=njuit_config.xg_latest_url)
+    img = await DataSource.get_topics(tp_num=tp_num, cmt_num=cmt_num,url=conf.xg_latest_url)
     if not img == None:
         await MessageUtils.build_message(img).send()
     else:
@@ -126,7 +136,7 @@ async def _(tp_num: int, cmt_num: int):
 
 @xg_hot_matcher.handle()
 async def handle_xg_hot():
-    img = await DataSource.get_topics(tp_num=njuit_config.topic_num,cmt_num=njuit_config.comment_num,url=njuit_config.xg_hot_url)
+    img = await DataSource.get_topics(tp_num=conf.topic_num,cmt_num=conf.comment_num,url=conf.xg_hot_url)
     if not img == None:
         await MessageUtils.build_message(img).send()
     else:
@@ -136,7 +146,7 @@ async def handle_xg_hot():
 
 @fm_matcher.handle()
 async def handle_fm_match():
-    pdf_path = NJUIT_PATH / "freshman.pdf"
+    pdf_path = FILE_PATH / "freshman.pdf"
     msg = await DataSource.send_file(pdf_path, "南工院新生宝典")
     await fm_matcher.finish(msg)
 
@@ -144,7 +154,7 @@ async def handle_fm_match():
 @map_matcher.handle()
 async def handle_send_image():
     # 构建完整图片路径
-    map_path = NJUIT_PATH / "map.png"
+    map_path = FILE_PATH / "map.png"
     await MessageUtils.build_message(map_path).send()
 
 
@@ -166,53 +176,65 @@ async def handle_bind(session: Uninfo, class_name: str = "", dorm_id: str = ""):
         return
 
     # 仅使用 user_id 进行绑定
-    bind = await DataSource.bind_info(
+    bind = await ElectricityService.bind_info(
         user_id=session.user.id, class_name=class_name, dorm_id=dorm_id
     )
     logger.info(
         f"绑定结果: 用户ID: {session.user.id}, 班级: {class_name}, 宿舍: {dorm_id}"
     )
     if bind:
-        await UserConsole.reduce_gold(user.user_id, 100, GoldHandle.BUY, "niit_guide")
-        await MessageUtils.build_message("绑定成功!").send(reply_to=True)
+        await UserConsole.reduce_gold(user.user_id, 91, GoldHandle.BUY, "niit_guide")
+        await MessageUtils.build_message("✅ 绑定成功！(电费推送默认开启)").send(reply_to=True)
     else:
-        await MessageUtils.build_message("绑定失败,肯定不是波奇的问题!").send(
-            reply_to=True
-        )
-
-
-@zx_bind_matcher.handle()
-async def handle_zx_bind(user_id: str, class_name: str = "", dorm_id: str = ""):
-    bind = await DataSource.bind_info(
-        user_id=user_id, class_name=class_name, dorm_id=dorm_id
-    )
-    logger.info(f"绑定结果: 用户ID: {user_id}, 班级: {class_name}, 宿舍: {dorm_id}")
-    if bind:
-        await MessageUtils.build_message("绑定成功!").send(reply_to=True)
-    else:
-        await MessageUtils.build_message("绑定失败,肯定不是波奇的问题!").send(
-            reply_to=True
-        )
+        await MessageUtils.build_message("❌ 绑定失败,肯定不是波奇的问题!").send(reply_to=True)
 
 
 @query_matcher.handle()
 async def handle_query(session: Uninfo):
-    msg = await DataSource.query_balance(session.user.id)
+    msg = await ElectricityService.query_balance(session.user.id)
     await MessageUtils.build_message(msg).send(reply_to=True)
 
 
+@push_matcher.handle()
+async def handle_push_setting(session: Uninfo, action: str):
+    """处理电费推送设置"""
+    
+    user_id = session.user.id
+    
+    # 检查用户是否已绑定宿舍
+    user_data = await NjuitStu.get_data(user_id)
+    if not user_data or not user_data.dorm_id:
+        await MessageUtils.build_message("先绑定宿舍信息才能开启电费推送哦！\n私聊小波奇发送'账号绑定 宿舍 宿舍id'来绑定宿舍吧~").send(reply_to=True)
+        return
+    
+    if action in ["开启", "开", "on"]:
+        success = await NjuitStu.update_push_status(user_id, True)
+        if success:
+            await MessageUtils.build_message("✅ 电费推送已开启！每天早上8点会收到电费余额提醒").send(reply_to=True)
+        else:
+            await MessageUtils.build_message("❌ 开启失败，请稍后重试").send(reply_to=True)
+    elif action in ["关闭", "关", "off"]:
+        success = await NjuitStu.update_push_status(user_id, False)
+        if success:
+            await MessageUtils.build_message("✅ 电费推送已关闭").send(reply_to=True)
+        else:
+            await MessageUtils.build_message("❌ 关闭失败，请稍后重试").send(reply_to=True)
+    else:
+        await MessageUtils.build_message("请使用：电费推送 开启/开/on 关闭/关/off\n别的格式小波奇不认哦~").send(reply_to=True)
+
+
 # 每日定时任务
-async def check(bot: Bot, group_id: str) -> bool:
+async def xg_check(bot: Bot, group_id: str) -> bool:
     return not await CommonUtils.task_is_block(bot, "today_xiaoguo", group_id)
 
 @scheduler.scheduled_job(
     "cron",
     hour=12,
-    minute=1,
+    minute=0,
 )
 async def send_daily_xg():
     try:
-        img = await DataSource.get_topics(tp_num=njuit_config.topic_num,cmt_num=njuit_config.comment_num,url=njuit_config.xg_latest_url)
+        img = await DataSource.get_topics(tp_num=conf.topic_num,cmt_num=conf.comment_num,url=conf.xg_latest_url)
         if img == None:
             logger.error("图片获取失败")
             return
@@ -220,8 +242,90 @@ async def send_daily_xg():
         await broadcast_group(
             msg,
             log_cmd="今日校果",  # 修改日志标识
-            check_func=check,  # 保留检查函数
+            check_func=xg_check,
         )
         logger.info("每日校果提醒发送成功")
     except Exception as e:
         logger.error(f"发送每日校果提醒失败: {e}")
+
+async def push_check(bot: Bot, group_id: str) -> bool:
+    """检查群组是否应该接收电费推送"""
+    # 检查任务是否被阻止
+    if await CommonUtils.task_is_block(bot, "today_bill_push", group_id):
+        return False
+    try:
+        # 获取群成员列表
+        group_members = await bot.get_group_member_list(group_id=int(group_id))
+        member_ids = [str(member['user_id']) for member in group_members]
+        
+        # 检查是否有开启推送的用户在群中
+        users_with_push = await NjuitStu.filter(push=True, user_id__in=member_ids).all()
+        return len(users_with_push) > 0
+    except Exception as e:
+        logger.error(f"检查群组 {group_id} 推送权限失败: {e}")
+        return False
+
+@scheduler.scheduled_job(
+    "cron",
+    hour=8,
+    minute=0,
+)
+async def send_daily_electricity_reminder():
+    """每天发送电费提醒"""
+    try:    
+        bot = get_bot()
+        # 获取所有开启推送的用户
+        users = await NjuitStu.filter(push=True).all()
+        if not users:
+            logger.info("没有用户开启电费推送")
+            return
+        # 获取所有群组
+        groups = await bot.get_group_list()
+        sent_count = 0
+        
+        for group in groups:
+            group_id = str(group['group_id'])
+            
+            # 检查群组是否应该接收推送
+            if not await push_check(bot, group_id):
+                continue
+            
+            # 为这个群生成消息
+            message_content = await ElectricityService.get_daily_electricity_reminder_for_group(group_id)
+            if message_content is None:
+                continue
+            try:
+                msg = MessageSegment.image(message_content)
+                await bot.send_group_msg(group_id=int(group_id), message=msg)
+                sent_count += 1
+                logger.info(f"电费提醒已发送到群 {group_id}")
+            except Exception as e:
+                logger.error(f"发送电费提醒到群 {group_id} 失败: {e}")
+        
+        logger.info(f"每日电费提醒发送完成，共发送到 {sent_count} 个群")
+    except Exception as e:
+        logger.error(f"发送每日电费提醒失败: {e}")
+
+# zx_bind_matcher = on_alconna(
+#     Alconna(
+#         "账号绑定",
+#         Args["user_id", str],
+#         Option("班级", Args["class_name", str, ""]),
+#         Option("宿舍", Args["dorm_id", str, ""]),
+#     ),
+#     permission=SUPERUSER,
+#     priority=5,
+#     block=True,
+# )
+
+# @zx_bind_matcher.handle()
+# async def handle_zx_bind(user_id: str, class_name: str = "", dorm_id: str = ""):
+#     # 如果提供了宿舍ID，先进行验证提示
+#     bind = await ElectricityService.bind_info(
+#         user_id=user_id, class_name=class_name, dorm_id=dorm_id
+#     )
+#     logger.info(f"绑定结果: 用户ID: {user_id}, 班级: {class_name}, 宿舍: {dorm_id}")
+#     if bind:
+#         await MessageUtils.build_message("✅ 绑定成功！").send(reply_to=True)
+#     else:
+#         await MessageUtils.build_message("❌ 绑定失败,肯定不是波奇的问题!").send(reply_to=True)

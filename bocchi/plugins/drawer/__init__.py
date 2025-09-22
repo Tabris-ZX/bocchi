@@ -1,6 +1,6 @@
 from nonebot_plugin_uninfo import Uninfo
 from bocchi.models.user_console import UserConsole
-from bocchi.plugins.PVC.data_source import build_img, normal_build_pvc
+
 from bocchi.utils.enum import GoldHandle
 from bocchi.utils.message import MessageUtils
 from nonebot.plugin import PluginMetadata
@@ -12,11 +12,13 @@ from nonebot_plugin_alconna.uniseg.tools import reply_fetch
 from bocchi.configs.utils import PluginExtraData, RegisterConfig
 from bocchi.utils.http_utils import AsyncHttpx
 from bocchi.utils.platform import PlatformUtils
+
+from .data_source import build_img, normal_build_pvc
 from .config import img_builder_config
 
 __plugin_meta__ = PluginMetadata(
-    name="PVC",
-    description="DIY手办生成/图片生成,可是有代价的!",
+    name="ai作图",
+    description="各种ai作图,可是有代价的!",
     usage="""
     指令:
         手办生成/pvc [图片]: 将图片变成PVC手办,每日不限次数,免费使用
@@ -28,7 +30,7 @@ __plugin_meta__ = PluginMetadata(
     """.strip(),
     extra=PluginExtraData(
         author="Tabris_ZX",
-        version="1.1",
+        version="1.1.1",
         configs=[
             RegisterConfig(
                 key="PVC_KEY",

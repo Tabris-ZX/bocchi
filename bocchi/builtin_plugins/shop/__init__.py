@@ -93,6 +93,19 @@ _use_matcher = on_alconna(
     block=True,
 )
 
+wrong_use_match = on_alconna(
+    Alconna(
+        "使用道具0",
+    ),
+    aliases={"使用道具1","使用道具2","使用道具3","使用道具4","使用道具5","使用道具6","使用道具7","使用道具8","使用道具9","使用道具10"},
+    priority=5,
+    block=True,
+)
+
+@wrong_use_match.handle()
+async def _():
+    await MessageUtils.build_message("道具后面要加空格的啊~").send(reply_to=True)
+
 _matcher.shortcut(
     "我的金币",
     command="商店",

@@ -166,7 +166,7 @@ class SignManage:
         if rand + add_probability > 0.91 or rand < specify_probability:
             impression_added *= 2
         await SignUser.sign(user, impression_added, session.self_id, platform)
-        gold = max(20,min(round(random.gauss(60,10)),100))
+        gold = max(20,min(round(random.gauss(50,10)),80))
         gift = random_event(float(user.impression))
         if isinstance(gift, int):
             gold += gift

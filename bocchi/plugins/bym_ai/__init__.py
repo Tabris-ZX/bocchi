@@ -319,8 +319,8 @@ async def _(
             f"今天已经收过{BotConfig.self_nickname}的礼物了哦~"
         ).finish(reply_to=True)
     except Exception as e:
-        logger.error("BYM AI 其他错误", "BYM_AI", session=session, e=e)
-        await MessageUtils.build_message("发生了一些异常，想要休息一下...").finish(
+        logger.error(f"BYM AI 其他错误{e}", "BYM_AI", session=session, e=e)
+        await MessageUtils.build_message(f"{BotConfig.self_nickname}有些累了，想要休息一下...").finish(
             reply_to=True
         )
 

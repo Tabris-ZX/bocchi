@@ -229,7 +229,6 @@ list_subscribes = on_alconna(
 async def handle_list_subscribes(event: Event):
     """查看当前订阅列表"""
     from nonebot.adapters.onebot.v11 import GroupMessageEvent, PrivateMessageEvent
-    from nonebot.adapters import Event
     
     event_obj = event
     group_id = None

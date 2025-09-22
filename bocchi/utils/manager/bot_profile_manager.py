@@ -28,7 +28,10 @@ thanks_users=[
 '2081524274',
 '865885535',
 '3891116983',
-'3480231705'
+'3480231705',
+'3828494966',
+'1271944500',
+'1272734165'
 ]
 
 Config.add_plugin_config(
@@ -171,9 +174,11 @@ class BotProfileManager:
         ]
         fetch_results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
         for result in fetch_results:
-            if isinstance(result, Exception) or result is None:
+            if isinstance(result, BaseException) or result is None:
                 continue
             name = getattr(result, "name", None)
+            if result.id == "1271944500":
+                name = "无言卫何"
             avatar = getattr(result, "avatar", None)
             if not name or not avatar:
                 continue

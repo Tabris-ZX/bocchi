@@ -356,7 +356,7 @@ class ShopManage:
                 uuid = list(user.props.keys())[int(goods_name)]
                 goods_info = await GoodsInfo.get_or_none(uuid=uuid)
             except IndexError:
-                return "仓库中道具不存在..."
+                return "仓库中道具不存在...\n(商店道具id和仓库道具id可能不同,建议发送'我的道具'查看一下捏~)"
         else:
             goods_info = await GoodsInfo.get_or_none(goods_name=goods_name)
         if not goods_info:

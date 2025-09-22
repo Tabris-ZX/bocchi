@@ -395,6 +395,17 @@ class CallApi:
             "model": self.tool_model if tools else self.chat_model,
             "temperature": 0.7,
         }
+        # 根据不同的模型添加禁用深度思考的参数
+        # model_name = (self.tool_model if tools else self.chat_model).lower()
+        # if "gemini" in model_name:
+        #     send_json["thinking_budget"] = 0
+        #     send_json["include_thoughts"] = False
+        # elif "deepseek" in model_name:
+        #     send_json["enable_thinking"] = False
+        # elif "qwen" in model_name:
+        #     send_json["enable_thinking"] = False
+        # elif "doubao" in model_name or "ark" in self.chat_url.lower():
+        #     send_json["thinking"] = {"type": "disabled"}
         if tools:
             send_json["tools"] = [
                 {"type": "function", "function": tool.to_dict()} for tool in tools
@@ -962,7 +973,7 @@ class ChatManager:
         result = random.choice(
             (
                 "哦豁？！",
-                "你好！Ov<",
+                "你好呀！Ov<",
                 f"库库库，呼唤{BotConfig.self_nickname}做什么呢",
                 "我在呢！",
                 "呼呼，叫俺干嘛",
