@@ -132,7 +132,7 @@ class ElectricityService:
         """查询用户宿舍电费余额"""
         data = await NjuitStu.get_data(user_id=user_id)
         if not data or not data.dorm_id:
-            return "你还没有绑定宿舍捏~ 私聊小波奇发送'账号绑定 宿舍 宿舍id'来绑定宿舍吧~"
+            return "你还没有绑定宿舍捏~ \n私聊小波奇发送'账号绑定 dorm 宿舍id'来绑定宿舍吧~"
         
         balance_info = await cls._get_electricity_balance(data.dorm_id)
         if balance_info['error']:

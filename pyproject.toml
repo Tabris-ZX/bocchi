@@ -56,7 +56,6 @@ jwt = "^1.4.0"
 curl-cffi = "^0.13.0"
 asyncpg = "^0.30.0"
 tqdm = "^4.67.1"
-imgkit = "^1.2.3"
 
 [tool.poetry.group.dev.dependencies]
 nonebug = "^0.4"
@@ -78,14 +77,11 @@ plugins = [
     "nonebot_plugin_session",
     "nonebot_plugin_htmlrender",
     "nonebot_plugin_alconna",
-    "nonebot_plugin_resolver2",
     "nonebot_plugin_memes",
 ]
 plugin_dirs = ["bocchi/services", "bocchi/builtin_plugins", "bocchi/plugins"]
 adapters = [
     { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" },
-    #    { name = "DoDo", module_name = "nonebot.adapters.dodo" },
-    #    { name = "开黑啦", module_name = "nonebot.adapters.kaiheila" },
 ]
 
 [tool.ruff]

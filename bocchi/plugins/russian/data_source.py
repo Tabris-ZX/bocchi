@@ -169,6 +169,7 @@ class RussianManage:
             ]
         else:
             message_list = [
+                "其他人可以发送'接受'来接受决斗",
                 "若30秒内无人接受挑战则此次对决作废"
                 "【首次游玩请at我发送 ’帮助俄罗斯轮盘‘ 来查看命令】"
             ]
@@ -215,7 +216,7 @@ class RussianManage:
                 [
                     "决斗已经开始！请",
                     At(flag="user", target=russian.player1[0]),
-                    "先开枪！",
+                    "先开枪！(开他/开我)",
                 ]
             )
         return MessageUtils.build_message(
@@ -375,7 +376,7 @@ class RussianManage:
                         f"下一枪中弹概率: {p:.2f}%\n",
                         f"现在轮到 ",
                         At(flag="user", target=next_player),
-                        f"({next_player_name}) 开枪！"
+                        f"({next_player_name}) 开枪！(开他/开我)"
                     ]),
                     None,
                 )

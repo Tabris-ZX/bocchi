@@ -23,9 +23,18 @@ async def _(user_id: str):
     await UserConsole.add_gold(user_id, rand, "BYM_AI")
     return f"钱包里装了{BotConfig.self_nickname}送给你的枚{rand}金币哦~"
 
+@gift_register(
+    name="完熟芒果盒子",
+    icon="wallet.png",
+    description=f"这是{BotConfig.self_nickname}害怕时会待的地方。",
+)
+async def _(user_id: str):
+    rand = random.randint(100, 500)
+    await UserConsole.add_gold(user_id, rand, "BYM_AI")
+    return f"盒子装了{BotConfig.self_nickname}送给你的枚{rand}金币哦~"
 
 @gift_register(
-    name="小发夹",
+    name="Bourbon水果硬糖小发夹",
     icon="hairpin.png",
     description=f"这是{BotConfig.self_nickname}的发夹，里面是波奇对你的期望。",
 )

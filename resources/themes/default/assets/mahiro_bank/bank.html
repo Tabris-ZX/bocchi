@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../js/echarts.min.js"></script>
+    <title>银行数据总览</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        /* 添加一些额外样式 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-title {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .stat-unit {
+            font-size: 16px;
+            color: #888;
+            margin-left: 5px;
+        }
+
+        .chart-container {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            position: absolute;
+            left: 109px;
+            top: -6px;
+            width: 146px;
+        }
+
+        .wrapper1 {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            width: 450px;
+        }
+
+        .title {
+            font-family: 'fzrzFont';
+            color: #696969;
+            font-size: 50px;
+            position: absolute;
+            top: -2px;
+            left: 16px;
+            width: 275px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper1">
+        <div class="header">
+            <!-- <img src="./res/img/bank.png" class="logo" class="logo" /> -->
+            <img src="./res/img/boqi.png" style="z-index: 1;" class="zhenxun" />
+            <div class="title" style="color: white;">小波奇银行</div>
+            <div class="title" style="top: 55px;">总览</div>
+            <div class="header-text3" style="left: 1px">Hitori Bank</div>
+        </div>
+        <div class="content-border">
+            <img src="./res/img/hua.png" class="hua" />
+            <div class="top-border" style="height: 20px;">
+            </div>
+            <div class="content">
+                <p style="margin-bottom: 0; font-size: 20px;">银行统计信息：</p>
+                <p class="tip">Bank Statistics Overview</p>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">总用户数</div>
+                        <div><span class="stat-value">{{data['user_count']}}</span><span class="stat-unit">位</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">总存款金额</div>
+                        <div><span class="stat-value">{{data['amount_sum']}}</span><span class="stat-unit">金币</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">今日新增存款</div>
+                        <div><span class="stat-value">{{data['today_count']}}</span><span class="stat-unit">条</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">日均存款</div>
+                        <div><span class="stat-value">{{data['day_amount']}}</span><span class="stat-unit">金币</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">活跃用户</div>
+                        <div><span class="stat-value">{{data['active_user_count']}}</span><span class="stat-unit">位</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">累计收益</div>
+                        <div><span class="stat-value">{{data['interest_amount']}}</span><span class="stat-unit">金币</span></div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="stat-title">近7日存款趋势</div>
+                    <!-- 这里可以放置图表，实际使用时可以用Chart.js等库 -->
+                    <div
+                        style="height: 200px; background: #f9f9f9; display: flex; justify-content: center; align-items: center; color: #999;">
+                       <div id="chart" class="chart"></div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; font-size: 14px; color: #888; text-align: center;">
+                    最后更新时间: <span id="full-update-time">{{data['create_time']}}</span> 
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('chart'));
+    // 指定图表的配置项和数据
+    var option = {
+            backgroundColor: "#fff",
+	    grid: {
+          top: "10%", // 控制数据表距离画布顶部的距离
+          bottom: "20%", // 控制数据表距离画布底部的距禿
+          left: "15%", // 控制数据表距离画布左侧的距离
+          right: "15%", // 控制数据表距离画布右侧的距离
+        },
+        animation: false,
+        xAxis: {
+            type: "category",
+            data: {{data.e_data|tojson}},
+	        axisLabel: {
+                interval: 0, //强制显示所有标签
+                rotate: 10,
+            },
+        },
+        yAxis: {
+            type: "value",
+        },
+        series: [{
+            data: {{data.e_amount|tojson}},
+            type: "line",
+            smooth: true,
+            lineStyle: {
+                // 可选：设置线条宽度
+                width: 2
+            },
+            label: {
+                normal: {
+                show: true,
+                position: 'top',
+                }
+            }
+        },],
+    };
+
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+
+</html>

@@ -21,7 +21,7 @@ __plugin_meta__ = PluginMetadata(
 
 _contribution_matcher = on_alconna(
     Alconna("为爱发电"),
-    aliases={"请zx喝奶茶","打赏","vivo50"},
+    aliases={"请zx喝奶茶","打赏","vivo50","凉乞钞"},
     priority=5,
     block=True,
 )

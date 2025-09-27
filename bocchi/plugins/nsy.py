@@ -95,7 +95,7 @@ async def send_nsy(name: str, num: int):
     if len(img_paths) == 1:
         await MessageUtils.build_message(img_paths[0]).send()
     else:
-        alc_msg= MessageUtils.build_message(img_paths)
+        alc_msg= MessageUtils.build_message(img_paths) #type: ignore
         await MessageUtils.alc_forward_msg(alc_msg, '3541219424', '可爱的小波奇').send()
 
     log_name = name or "随机"

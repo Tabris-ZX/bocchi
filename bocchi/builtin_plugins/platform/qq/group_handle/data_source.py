@@ -238,7 +238,7 @@ class GroupManager:
         image = DEFAULT_IMAGE_PATH / random.choice(os.listdir(DEFAULT_IMAGE_PATH))
         await MessageUtils.build_message(
             [
-                "新人快跑啊！！本群现状↓（快使用自定义群欢迎消息！）",
+                "新人快跑啊！！本群现状↓",
                 image,
             ]
         ).send()

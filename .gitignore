@@ -143,5 +143,5 @@ data/
 log/
 backup/
 .idea/
-resources/
+# resources/
 .vscode/launch.json
