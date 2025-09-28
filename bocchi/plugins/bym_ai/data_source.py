@@ -917,6 +917,7 @@ class ChatManager:
             )
 
         # 处理工具回调
+        call_result = None
         if message.tool_calls:
             # temp_conversation = conversation.copy()
             call_result = await AiCallTool.build_conversation(
@@ -941,7 +942,13 @@ class ChatManager:
             #     if _filter_result(res):
             #         assistant_reply = res
         Conversation.set_history(session.user.id, group_id, conversation)
-        return remove_deep_seek(assistant_reply, True)
+        final_reply = remove_deep_seek(assistant_reply, True)
+        if (not final_reply.strip()) or final_reply.strip().upper() == "<EMPTY>":
+            fallback = str(call_result).strip() if call_result else ""
+            if not fallback:
+                fallback = f"{BotConfig.self_nickname}赠送了礼物。"
+            return fallback
+        return final_reply
 
     @classmethod
     async def tts(cls, content: str) -> bytes | None:

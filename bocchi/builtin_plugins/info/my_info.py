@@ -161,9 +161,9 @@ async def get_user_info(
             "avatar_url": ava_url,
             "nickname": nickname,
             "title": "勇 者",
-            "race": random.choice(RACE),
+            "race": random.choice(RACE)+"(随机)",
             "sex": random.choice(SEX),
-            "occupation": random.choice(OCC),
+            "occupation": random.choice(OCC)+"(随机)",
             "uid": uid,
             "description": (
                 "你还没有个人简介捏,快去设置吧!"

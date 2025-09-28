@@ -7,7 +7,7 @@ from asyncpg import UniqueViolationError
 from nonebot_plugin_alconna import UniMessage
 
 from bocchi.configs.config import BotConfig, Config
-from bocchi.configs.path_config import IMAGE_PATH, TEMP_PATH
+from bocchi.configs.path_config import DATA_PATH, TEMP_PATH
 from bocchi.services.log import logger
 from bocchi.utils._build_image import BuildImage
 from bocchi.utils.http_utils import AsyncHttpx
@@ -15,6 +15,8 @@ from bocchi.utils.message import MessageUtils
 from bocchi.utils.utils import change_img_md5, change_pixiv_image_links
 
 from .._model import Setu
+
+IMAGE_PATH = DATA_PATH / "setu"
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6;"

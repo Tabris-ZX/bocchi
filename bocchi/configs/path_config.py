@@ -13,10 +13,10 @@ FONT_PATH = Path() / "resources" / "font"
 # 数据路径
 DATA_PATH = Path() / "data"
 # 临时数据路径
-TEMP_PATH = Path() / "resources" / "temp"
+TEMP_PATH = Path() / "data" / "temp"
 # 网页模板路径
 THEMES_PATH = Path() / "resources" / "themes"
-# [新增] UI渲染服务的统一缓存路径
+#UI渲染服务的统一缓存路径
 UI_CACHE_PATH = TEMP_PATH / "ui_cache"
 
 

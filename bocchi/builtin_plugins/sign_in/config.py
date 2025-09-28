@@ -1,7 +1,7 @@
-from bocchi.configs.path_config import IMAGE_PATH
+from bocchi.configs.path_config import TEMP_PATH
 
-SIGN_TODAY_CARD_PATH = IMAGE_PATH / "sign" / "today_card"
-
+# SIGN_TODAY_CARD_PATH = IMAGE_PATH / "sign" / "today_card"
+SIGN_TODAY_CARD_PATH = TEMP_PATH /"sign"
 
 lik2relation = {
     "0": "路人",
