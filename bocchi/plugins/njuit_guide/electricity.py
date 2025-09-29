@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 from nonebot import get_bot
+from bocchi import ui
 
 from bocchi.configs.path_config import DATA_PATH, THEMES_PATH
 from bocchi.services.log import logger
@@ -16,7 +17,7 @@ from .model import NjuitStu
 
 
 FILE_PATH = DATA_PATH / "njuit_guide"
-TEMPLATES_PATH = THEMES_PATH / "default" / "templates" / "njuit_guide"
+TEMPLATES_PATH = THEMES_PATH / "default" / "templates" /"pages"/"builtin"/ "njuit_guide"
 
 
 class ElectricityService:
@@ -189,30 +190,22 @@ class ElectricityService:
 
     @classmethod
     async def generate_electricity_image(cls, user_data: list) -> Optional[Path]:
-        """生成电费提醒的图片"""
+        """生成电费提醒的图片（统一UI渲染）"""
         try:
-            # 读取HTML模板
-            template_path = TEMPLATES_PATH / "electricity_template.html"
-            if not template_path.exists():
-                logger.error("电费模板文件不存在")
-                return None
-            
-            html_template = template_path.read_text(encoding="utf-8")
-            
-            # 生成用户数据HTML
-            user_html = "".join(cls._generate_user_html(user) for user in user_data)
-            full_html = html_template.replace(
-                '<div class="content" id="content">\n            <!-- 用户数据将在这里动态插入 -->\n        </div>',
-                f'<div class="content" id="content">\n            {user_html}\n        </div>'
+            # 生成内容区域html
+            content_html = "".join(cls._generate_user_html(user) for user in user_data)
+            # 使用UI统一渲染
+            image_bytes = await ui.render_template(
+                "pages/builtin/njuit_guide/electricity_template.html",
+                data={"content": content_html},
+                viewport={"width": 400, "height": 10},
             )
-            
-            # 生成图片
-            save_path = FILE_PATH / "electricity_reminder.jpg"
 
-            if await DataSource.html_to_img(full_html, save_path):
-                return save_path
-            else:
-                return None
+            # 兼容原有返回文件路径的调用方：写入到固定路径后返回
+            save_path = FILE_PATH / "electricity_reminder.jpg"
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+            save_path.write_bytes(image_bytes)
+            return save_path
                 
         except Exception as e:
             logger.error(f"生成电费图片失败: {e}")

@@ -1,17 +1,17 @@
 <style>
-    {% include 'pages/builtin/mahiro_bank/_base.css' %}
-    {% include 'pages/builtin/mahiro_bank/user.css' %}
+    {% include 'pages/builtin/bocchi_bank/_base.css' %}
+    {% include 'pages/builtin/bocchi_bank/user.css' %}
 </style>
     <div class="wrapper">
         <div class="header">
-            <div class="header-text1">小真寻<span style="font-size: 30px;">の</span></div>
+            <div class="header-text1">小波奇<span style="font-size: 30px;">の</span></div>
             <div class="header-text2">银行</div>
-            <div class="header-text3">Mahiro</div>
-            <img src="{{ theme.asset('mahiro_bank/img/zhenxun.png') }}" class="zhenxun" />
+            <div class="header-text3">Bocchi</div>
+            <img src="{{ theme.asset('bocchi_bank/img/boqi.png') }}" class="zhenxun" />
             <img src="{{data['avatar_url']}}" class="avatar" />
         </div>
         <div class="content-border">
-            <img src="{{ theme.asset('mahiro_bank/img/hua.png') }}" class="hua" />
+            <img src="{{ theme.asset('bocchi_bank/img/hua.png') }}" class="hua" />
             <div class="top-border">
                 <div>
                     <div class="color"></div>
@@ -65,7 +65,7 @@
                         <div class="deposit-record">
                             <div class="record-header">
                                 <div class="record-title">
-                                    <img src="{{ theme.asset('mahiro_bank/img/bank_icon.png') }}" class="record-icon" />
+                                    <img src="{{ theme.asset('bocchi_bank/img/bank_icon.png') }}" class="record-icon" />
                                     存款记录 #{{deposit['id']}}
                                 </div>
                                 <div class="record-date">{{deposit['date']}}</div>

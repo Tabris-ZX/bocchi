@@ -5,10 +5,10 @@
 {% block body_content %}
 {% if data.page_type == 'overview' %}
 {% set data = data.payload %}
-{% include 'pages/builtin/mahiro_bank/overview.html' %}
+{% include 'pages/builtin/bocchi_bank/overview.html' %}
 {% elif data.page_type == 'user' %}
 {% set data = data.payload %}
-{% include 'pages/builtin/mahiro_bank/user.html' %}
+{% include 'pages/builtin/bocchi_bank/user.html' %}
 {% else %}
 <h1>渲染错误</h1>
 <p>提供了无效的页面类型: {{ data.page_type }}</p>

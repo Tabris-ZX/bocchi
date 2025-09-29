@@ -34,7 +34,7 @@ driver = nonebot.get_driver()
 
 RESTART_MARK = Path() / "is_restart"
 SHUTDOWN_MARK = Path() / "is_shutdown"  # !!! Added: 关机标记文件
-RESTART_FILE = Path() / "restart.sh"
+RESTART_FILE = Path("tools") / "restart.sh"
 
 _matcher = on_command(
     "重启",
@@ -68,9 +68,9 @@ async def _(bot: Bot, session: Uninfo, flag: str = ArgStr("flag")):
             python = sys.executable
             os.execl(python, python, *sys.argv)
         else:
-            if not os.access("./restart.sh", os.X_OK):  # !!! Modified: 检查执行权限
-                os.system("chmod +x ./restart.sh")      # !!! Modified: 自动赋权
-            os.system("./restart.sh")  # noqa: ASYNC221
+            if not os.access("./tools/restart.sh", os.X_OK):  # !!! Modified: 检查执行权限
+                os.system("chmod +x ./tools/restart.sh")      # !!! Modified: 自动赋权
+            os.system("./tools/restart.sh")  # noqa: ASYNC221
     else:
         await MessageUtils.build_message("已取消操作...").send()
 
@@ -88,7 +88,7 @@ async def _(bot: Bot):
                 "sleep 3\n"
                 "python3 bot.py"
             )
-        os.system("chmod +x ./restart.sh")  # noqa: ASYNC221
+        os.system("chmod +x ./tools/restart.sh")  # noqa: ASYNC221
         logger.info("已自动生成 restart.sh(重启) 文件，请检查脚本是否与本地指令符合...")
     if RESTART_MARK.exists():
         async with aiofiles.open(RESTART_MARK, encoding="utf8") as f:

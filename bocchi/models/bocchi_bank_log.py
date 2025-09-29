@@ -27,5 +27,5 @@ class MahiroBankLog(Model):
     """创建时间"""
 
     class Meta:  # pyright: ignore [reportIncompatibleVariableOverride]
-        table = "mahiro_bank_log"
+        table = "bocchi_bank_log"
         table_description = "小波奇银行日志"

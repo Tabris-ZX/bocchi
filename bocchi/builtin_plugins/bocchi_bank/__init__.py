@@ -194,7 +194,7 @@ async def _(session: Uninfo, arparma: Arparma, uname: str = UserName()):
     render_data = {"page_type": "user", "payload": user_payload}
 
     image_bytes = await ui.render_template(
-        "pages/builtin/mahiro_bank",
+        "pages/builtin/bocchi_bank",
         data=render_data,
         viewport={"width": 386, "height": 10},
     )
@@ -210,7 +210,7 @@ async def _(session: Uninfo, arparma: Arparma):
     render_data = {"page_type": "overview", "payload": overview_payload}
 
     image_bytes = await ui.render_template(
-        "pages/builtin/mahiro_bank",
+        "pages/builtin/bocchi_bank",
         data=render_data,
         viewport={"width": 450, "height": 10},
     )

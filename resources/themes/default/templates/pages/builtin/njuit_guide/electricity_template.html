@@ -220,7 +220,7 @@
             <p style="font-size: 12px;"> 发送 '电费推送 开/关' 来控制每日电费推送</p>
         </div>
         <div class="content" id="content">
-            <!-- 用户数据将在这里动态插入 -->
+            {{ data.content|safe }}
         </div>
         <div class="footer">
             <p>💡 余额不足记得及时充值哦~</p>

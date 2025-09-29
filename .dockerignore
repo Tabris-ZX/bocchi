@@ -14,7 +14,7 @@ tests/
 .pre-commit-config.yaml
 .prettier*
 .env.dev
-docker-compose.yml
-Dockerfile
+tools/deploy/docker-compose-dev.yml
+tools/deploy/Dockerfile
 LICENSE
 *.md

@@ -7,14 +7,14 @@ from tortoise.expressions import RawSQL
 from tortoise.functions import Count, Sum
 
 from bocchi.configs.config import Config
-from bocchi.models.mahiro_bank import MahiroBank
-from bocchi.models.mahiro_bank_log import MahiroBankLog
+from bocchi.models.bocchi_bank import MahiroBank
+from bocchi.models.bocchi_bank_log import MahiroBankLog
 from bocchi.models.sign_user import SignUser
 from bocchi.models.user_console import UserConsole
 from bocchi.utils.enum import BankHandleType, GoldHandle
 from bocchi.utils.platform import PlatformUtils
 
-base_config = Config.get("mahiro_bank")
+base_config = Config.get("bocchi_bank")
 
 
 class BankManager:

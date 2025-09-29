@@ -4,6 +4,7 @@ from typing import Optional
 import httpx
 from datetime import datetime
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
+from bocchi import ui
 from playwright.async_api import async_playwright
 from html import escape
 
@@ -14,7 +15,7 @@ from bocchi.services.log import logger
 from bocchi.services.db_context import Model
 
 FILE_PATH = DATA_PATH / "njuit_guide"
-TEMPLATES_PATH = THEMES_PATH / "default" / "templates" / "njuit_guide"
+TEMPLATES_PATH = THEMES_PATH / "default" / "templates" /"pages"/"builtin"/ "njuit_guide"
 save_path = FILE_PATH / "xiaoguo.png"
 save_path.parent.mkdir(parents=True, exist_ok=True)
 xg_path = TEMPLATES_PATH / "xg_template.html"
@@ -78,12 +79,12 @@ class DataSource:
         return []
 
     @classmethod
-    def _generate_images_html(cls, imgs: list, alt_text: str) -> list:
-        """生成图片HTML"""
+    def _generate_images_html(cls, imgs: list, alt_text: str, class_name: str = "images") -> list:
+        """生成图片HTML，支持自定义容器class用于样式匹配"""
         if not imgs:
             return []
         return [
-            '<div class="images">',
+            f'<div class="{class_name}">',
             *[f'<img src="{escape(img_url)}" alt="{alt_text}" loading="lazy">' for img_url in imgs],
             '</div>'
         ]
@@ -119,7 +120,7 @@ class DataSource:
         ]
         
         # 处理评论图片
-        html_parts.extend(cls._generate_images_html(comment.get("imgs", []), "评论图片"))
+        html_parts.extend(cls._generate_images_html(comment.get("imgs", []), "评论图片", "comment-images"))
         
         # 处理回复
         html_parts.extend(await cls._generate_replies_html(comment.get("replys", {})))
@@ -154,7 +155,7 @@ class DataSource:
             ])
             
             # 处理回复图片
-            html_parts.extend(cls._generate_images_html(reply.get("imgs", []), "回复图片"))
+            html_parts.extend(cls._generate_images_html(reply.get("imgs", []), "回复图片", "reply-images"))
             html_parts.append('</div>')
         
         html_parts.append('</div>')
@@ -176,7 +177,7 @@ class DataSource:
         ]
         
         # 处理话题图片
-        html_parts.extend(cls._generate_images_html(topic.get("imgs", []), "帖子图片"))
+        html_parts.extend(cls._generate_images_html(topic.get("imgs", []), "帖子图片", "topic-images"))
         
         # 处理评论
         comments = await cls._get_comments(client, topic["id"], cmt_num)
@@ -190,11 +191,11 @@ class DataSource:
         return html_parts
 
     @classmethod
-    async def get_topics(cls, tp_num: int, cmt_num: int, url: str) -> Optional[Path]:
-        """获取话题并生成图片"""
+    async def get_topics(cls, tp_num: int, cmt_num: int, url: str) -> Optional[bytes]:
+        """获取话题并生成图片（使用统一UI渲染）"""
         try:
-            html_template = xg_path.read_text(encoding="utf-8")
-            html_parts = [html_template]
+            # 组装内容区域HTML
+            content_parts: list[str] = []
             
             async with httpx.AsyncClient(headers=njuit_config.xg_headers, timeout=30.0) as client:
                 response = await client.get(url)
@@ -202,14 +203,16 @@ class DataSource:
                 topics = cls._extract_data_from_response(response_data, tp_num)
                 
                 for topic in topics:
-                    html_parts.extend(await cls._generate_topic_html(topic, client, cmt_num))
-                
-                html_parts.append("</body></html>")
-                full_html = "".join(html_parts)
-                
-                if await cls.html_to_img(full_html):
-                    return save_path
-                return None
+                    content_parts.extend(await cls._generate_topic_html(topic, client, cmt_num))
+
+                content_html = "".join(content_parts)
+
+                image_bytes = await ui.render_template(
+                    "pages/builtin/njuit_guide/xg_template.html",
+                    data={"content": content_html},
+                    viewport={"width": 386, "height": 10},
+                )
+                return image_bytes
                 
         except Exception as e:
             logger.error(f"生成失败: {e}")

@@ -5,7 +5,7 @@ from tortoise import fields
 
 from bocchi.services.db_context import Model
 
-from .mahiro_bank_log import BankHandleType, MahiroBankLog
+from .bocchi_bank_log import BankHandleType, MahiroBankLog
 
 
 class MahiroBank(Model):
@@ -27,7 +27,7 @@ class MahiroBank(Model):
     """创建时间"""
 
     class Meta:  # pyright: ignore [reportIncompatibleVariableOverride]
-        table = "mahiro_bank"
+        table = "bocchi_bank"
         table_description = "小波奇银行"
 
     @classmethod
