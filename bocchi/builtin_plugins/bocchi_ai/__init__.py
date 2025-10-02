@@ -25,9 +25,9 @@ from bocchi.services.plugin_init import PluginInit
 from bocchi.utils.depends import CheckConfig, UserName
 from bocchi.utils.message import MessageUtils
 
-from .bym_gift import ICON_PATH
-from .bym_gift.data_source import send_gift
-from .bym_gift.gift_reg import driver as gift_driver  # noqa: F401
+from .give_gift import ICON_PATH
+from .give_gift.data_source import send_gift
+from .give_gift.gift_reg import driver as gift_driver  # noqa: F401
 from .config import Arparma, FunctionParam
 from .data_source import ChatManager, Conversation, base_config, split_text
 from .exception import GiftRepeatSendException, NotResultException

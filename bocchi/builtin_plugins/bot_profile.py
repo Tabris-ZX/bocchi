@@ -31,7 +31,7 @@ __plugin_meta__ = PluginMetadata(
 )
 
 
-_matcher = on_alconna(Alconna("自我介绍"), priority=5, block=True, rule=to_me())
+_matcher = on_alconna(Alconna("自我介绍"),aliases={"关于"}, priority=5, block=True, rule=to_me())
 
 _reload_matcher = on_alconna(
     Alconna("重载自我介绍"), priority=1, block=True, permission=SUPERUSER

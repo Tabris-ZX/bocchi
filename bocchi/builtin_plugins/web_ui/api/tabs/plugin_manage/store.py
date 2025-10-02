@@ -14,7 +14,7 @@ router = APIRouter(prefix="/store")
 
 
 @router.get(
-    "/get_plugin_store",
+    "/get_zhenxun_plugins",
     dependencies=[authentication()],
     response_model=Result[dict],
     response_class=JSONResponse,
@@ -22,8 +22,8 @@ router = APIRouter(prefix="/store")
 )
 async def _() -> Result[dict]:
     try:
-        require("plugin_store")
-        from bocchi.builtin_plugins.plugin_store import StoreManager
+        require("zhenxun_plugins")
+        from bocchi.builtin_plugins.zhenxun_plugins import StoreManager
 
         plugin_list, extra_plugin_list = await StoreManager.get_data()
         plugin_list = [
@@ -48,8 +48,8 @@ async def _() -> Result[dict]:
 )
 async def _(param: PluginIr) -> Result:
     try:
-        require("plugin_store")
-        from bocchi.builtin_plugins.plugin_store import StoreManager
+        require("zhenxun_plugins")
+        from bocchi.builtin_plugins.zhenxun_plugins import StoreManager
 
         result = await StoreManager.add_plugin(param.id)  # type: ignore
         return Result.ok(info=result)
@@ -66,8 +66,8 @@ async def _(param: PluginIr) -> Result:
 )
 async def _(param: PluginIr) -> Result:
     try:
-        require("plugin_store")
-        from bocchi.builtin_plugins.plugin_store import StoreManager
+        require("zhenxun_plugins")
+        from bocchi.builtin_plugins.zhenxun_plugins import StoreManager
 
         result = await StoreManager.update_plugin(param.id)  # type: ignore
         return Result.ok(info=result)
@@ -84,8 +84,8 @@ async def _(param: PluginIr) -> Result:
 )
 async def _(param: PluginIr) -> Result:
     try:
-        require("plugin_store")
-        from bocchi.builtin_plugins.plugin_store import StoreManager
+        require("zhenxun_plugins")
+        from bocchi.builtin_plugins.zhenxun_plugins import StoreManager
 
         result = await StoreManager.remove_plugin(param.id)  # type: ignore
         return Result.ok(info=result)

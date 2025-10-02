@@ -95,13 +95,13 @@ try:
 except Exception:
     default_soul = "欲望化身"
 finally:
-    if not default_soul:
+    if not default_soul: # type: ignore
         default_soul = "欲望化身"
 
 
 fuck = on_alconna(
     Alconna(
-        "上",
+        "上不上",
         Args["image?", Image | At],
         Option(
             "-s",

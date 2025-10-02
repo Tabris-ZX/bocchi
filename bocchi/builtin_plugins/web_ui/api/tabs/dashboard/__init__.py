@@ -11,7 +11,7 @@ from ....utils import authentication
 from .data_source import ApiDataSource
 from .model import AllChatAndCallCount, BotInfo, ChatCallMonthCount, QueryChatCallCount
 
-require("plugin_store")
+require("zhenxun_plugins")
 
 router = APIRouter(prefix="/dashboard")
 

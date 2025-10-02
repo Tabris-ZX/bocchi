@@ -9,7 +9,7 @@ from nonebot.drivers import Driver
 from PIL import UnidentifiedImageError
 import ujson as json
 
-from bocchi.configs.path_config import IMAGE_PATH, TEMP_PATH, TEXT_PATH
+from bocchi.configs.path_config import TEMP_PATH, TEXT_PATH,DATA_PATH
 from bocchi.services.log import logger
 from bocchi.utils._build_image import BuildImage
 from bocchi.utils.http_utils import AsyncHttpx
@@ -19,7 +19,7 @@ from .._model import Setu
 
 driver: Driver = nonebot.get_driver()
 
-_path = IMAGE_PATH
+_path = DATA_PATH
 
 
 # 替换旧色图数据，修复local_id一直是50的问题
@@ -88,9 +88,9 @@ async def update_old_setu_data():
 
 
 # 删除色图rar文件夹
-shutil.rmtree(IMAGE_PATH / "setu_rar", ignore_errors=True)
-shutil.rmtree(IMAGE_PATH / "r18_rar", ignore_errors=True)
-shutil.rmtree(IMAGE_PATH / "rar", ignore_errors=True)
+shutil.rmtree(TEMP_PATH / "setu_rar", ignore_errors=True)
+shutil.rmtree(TEMP_PATH / "r18_rar", ignore_errors=True)
+shutil.rmtree(TEMP_PATH / "rar", ignore_errors=True)
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6;"

@@ -5,7 +5,7 @@ import shutil
 from aiocache import cached
 import ujson as json
 
-from bocchi.builtin_plugins.plugin_store.models import StorePluginInfo
+from bocchi.builtin_plugins.zhenxun_plugins.models import StorePluginInfo
 from bocchi.configs.path_config import TEMP_PATH
 from bocchi.models.plugin_info import PluginInfo
 from bocchi.services.log import logger
@@ -298,8 +298,8 @@ class StoreManager:
         if not is_install_req:
             # 从仓库根目录查找文件
             rand = random.randint(1, 10000)
-            requirement_path = TEMP_PATH / f"plugin_store_{rand}_req.txt"
-            requirements_path = TEMP_PATH / f"plugin_store_{rand}_reqs.txt"
+            requirement_path = TEMP_PATH / f"zhenxun_plugins_{rand}_req.txt"
+            requirements_path = TEMP_PATH / f"zhenxun_plugins_{rand}_reqs.txt"
             await RepoFileManager.download_files(
                 github_url,
                 [

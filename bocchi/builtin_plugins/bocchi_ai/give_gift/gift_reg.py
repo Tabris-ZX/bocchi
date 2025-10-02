@@ -45,6 +45,17 @@ async def _(user_id: str):
     await user.save(update_fields=["impression"])
     return f"你使用了小发夹，{BotConfig.self_nickname}对你提升了{rand:.2f}好感度~"
 
+@gift_register(
+    name="下北泽限量版吉他拨片",
+    icon="hairpin.png",
+    description=f"这是{BotConfig.self_nickname}的吉他拨片",
+)
+async def _(user_id: str):
+    rand = random.uniform(0.01, 0.5)
+    user = await SignUser.get_user(user_id)
+    user.impression += Decimal(rand)
+    await user.save(update_fields=["impression"])
+    return f"你使用了下北泽限量版吉他拨片，{BotConfig.self_nickname}对你提升了{rand:.2f}好感度~"
 
 @driver.on_startup
 async def _():
