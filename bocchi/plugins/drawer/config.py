@@ -11,9 +11,7 @@ class NormalBuilderConfig:
     背景为室内场景（如展示柜、房间或桌面），让整体效果像商品展示照。
     """
 
-    base_url = "https://api-proxy.me/gemini/v1beta/models/"
-    api_key = "AIzaSyAIHztqog_h_MEDHw_C3HvIidX1p4aAWbU"
-    model = "gemini-2.5-flash-image-preview"
+    # 使用 OpenAI 兼容接口，由 ImgBuilderConfig 统一提供 base_url / model / api_key
 
 normal_config = NormalBuilderConfig()
 
@@ -68,8 +66,8 @@ class ImgBuilderConfig:
         emphasized]
         Image size is 585px 1024px
     """
-    base_url = "https://api-proxy.me/gemini/v1beta/models/"
     key_config = Config.get("PVC")
+    base_url = key_config.get("PVC_BASE_URL") or "https://api.openai.com/v1"
 
     #多key轮询
     keys: List[str] = (
@@ -80,7 +78,7 @@ class ImgBuilderConfig:
     key_times: Dict[str, int] = {key: 0 for key in keys}
     cooldown_seconds = 15 * 60  
 
-    model = "gemini-2.5-flash-image-preview"
+    model = key_config.get("PVC_MODEL") or "gpt-image-1"
 
     @classmethod
     def get_api_key(cls) -> str:

@@ -10,6 +10,7 @@ from bocchi.models.chat_history import ChatHistory
 from bocchi.services.log import logger
 from bocchi.utils.enum import PluginType
 from bocchi.utils.utils import get_entity_ids
+from bocchi.services.db_context.utils import with_db_timeout
 
 __plugin_meta__ = PluginMetadata(
     name="消息存储",
@@ -59,14 +60,24 @@ async def _(message: UniMsg, session: Uninfo):
 
 @scheduler.scheduled_job(
     "interval",
-    minutes=1,
+    seconds=10,
 )
 async def _():
     try:
         message_list = TEMP_LIST.copy()
         TEMP_LIST.clear()
         if message_list:
-            await ChatHistory.bulk_create(message_list)
-            logger.debug(f"批量添加聊天记录 {len(message_list)} 条", "定时任务")
+            # 分片 + 指定 batch_size，避免单批过大导致超时或长事务
+            batch_size = 500
+            chunk_size = 1000
+            total = len(message_list)
+            for i in range(0, total, chunk_size):
+                chunk = message_list[i : i + chunk_size]
+                await with_db_timeout(
+                    ChatHistory.bulk_create(chunk, batch_size=batch_size),
+                    timeout=10.0,
+                    operation=f"ChatHistory.bulk_create[{len(chunk)}]",
+                )
+            logger.debug(f"批量添加聊天记录 {total} 条", "定时任务")
     except Exception as e:
         logger.warning("存储聊天记录失败", "chat_history", e=e)

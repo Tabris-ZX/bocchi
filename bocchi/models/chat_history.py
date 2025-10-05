@@ -29,6 +29,12 @@ class ChatHistory(Model):
     class Meta:  # pyright: ignore [reportIncompatibleVariableOverride]
         table = "chat_history"
         table_description = "聊天记录数据表"
+        # 为常用查询添加联合索引
+        indexes = (
+            ("group_id", "create_time"),
+            ("group_id", "user_id"),
+            ("create_time",),
+        )
 
     @classmethod
     async def get_group_msg_rank(
@@ -132,4 +138,8 @@ class ChatHistory(Model):
             "ALTER TABLE chat_history ADD bot_id VARCHAR(255);",
             "ALTER TABLE chat_history ALTER COLUMN bot_id TYPE character varying(255);",
             "ALTER TABLE chat_history ADD COLUMN platform character varying(255);",
+            # 索引（若不存在则创建）
+            "CREATE INDEX IF NOT EXISTS idx_chat_history_group_ctime ON chat_history (group_id, create_time);",
+            "CREATE INDEX IF NOT EXISTS idx_chat_history_group_user ON chat_history (group_id, user_id);",
+            "CREATE INDEX IF NOT EXISTS idx_chat_history_ctime ON chat_history (create_time);",
         ]

@@ -3,7 +3,7 @@ from collections.abc import Callable
 from pydantic import BaseModel
 
 # 数据库操作超时设置（秒）
-DB_TIMEOUT_SECONDS = 3.0
+DB_TIMEOUT_SECONDS = 8.0
 
 # 性能监控阈值（秒）
 SLOW_QUERY_THRESHOLD = 0.5
@@ -12,8 +12,8 @@ LOG_COMMAND = "DbContext"
 
 
 POSTGRESQL_CONFIG = {
-    "max_size": 30,  # 最大连接数
-    "min_size": 5,  # 最小保持的连接数（可选）
+    "max_size": 20,  # 最大连接数（2核4G：适中并发，避免上下文切换开销）
+    "min_size": 2,  # 最小保持的连接数（减小内存占用）
 }
 
 

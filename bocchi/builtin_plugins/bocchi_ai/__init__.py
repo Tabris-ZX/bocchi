@@ -35,7 +35,7 @@ from .goods_register import driver as goods_driver  # noqa: F401
 from .models.bym_chat import BymChat
 
 __plugin_meta__ = PluginMetadata(
-    name="BYM_AI",
+    name="孤独AI",
     description=f"{BotConfig.self_nickname}想成为人类...",
     usage=f"""
     你问小波奇的愿望？
@@ -247,7 +247,7 @@ async def _(
         event=event,
         arparma=Arparma(head_result="BYM_AI"),
         session=session,
-        message=message,
+        message=BotConfig.self_nickname + " " + message,
     )
     group_id = session.group.id if session.group else None
     is_bym = not event.is_tome()

@@ -9,8 +9,8 @@ from pydantic import BaseModel
 from bocchi.configs.config import BotConfig, Config
 from bocchi.configs.path_config import DATA_PATH, IMAGE_PATH
 
-base_config = Config.get("bym_ai")
-PROMPT_FILE = DATA_PATH / "bym_ai" / "prompt.txt"
+base_config = Config.get("bocchi_ai")
+PROMPT_FILE = DATA_PATH / "bocchi_ai" / "prompt.txt"
 PROMPT_FILE.parent.mkdir(parents=True, exist_ok=True)
 PROMPT_FILE.touch(exist_ok=True)
 

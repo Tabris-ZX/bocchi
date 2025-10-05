@@ -11,7 +11,6 @@ from bocchi.configs.path_config import DATA_PATH, THEMES_PATH
 from bocchi.services.log import logger
 from nonebot_plugin_uninfo import get_interface
 
-from .data_source import DataSource
 from .config import njuit_config
 from .model import NjuitStu
 
@@ -129,11 +128,12 @@ class ElectricityService:
             return False
 
     @classmethod
-    async def query_balance(cls, user_id) -> str:
+    async def query_balance(cls, user_id):
         """查询用户宿舍电费余额"""
         data = await NjuitStu.get_data(user_id=user_id)
         if not data or not data.dorm_id:
-            return "你还没有绑定宿舍捏~ \n私聊小波奇发送'账号绑定 dorm 宿舍id'来绑定宿舍吧~"
+            dorm_id_path = FILE_PATH/"dorm_id.png"
+            return ["你还没有绑定宿舍捏~ \n私聊小波奇发送\n账号绑定  dorm  宿舍id\n来绑定宿舍吧~",dorm_id_path]
         
         balance_info = await cls._get_electricity_balance(data.dorm_id)
         if balance_info['error']:

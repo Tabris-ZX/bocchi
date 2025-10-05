@@ -9,10 +9,8 @@ from playwright.async_api import async_playwright
 from html import escape
 
 from .config import njuit_config
-from .model import NjuitStu
 from bocchi.configs.path_config import DATA_PATH, THEMES_PATH
 from bocchi.services.log import logger
-from bocchi.services.db_context import Model
 
 FILE_PATH = DATA_PATH / "njuit_guide"
 TEMPLATES_PATH = THEMES_PATH / "default" / "templates" /"pages"/"builtin"/ "njuit_guide"

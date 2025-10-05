@@ -20,10 +20,10 @@ from bocchi.utils.message import MessageUtils
 from bocchi.utils.platform import PlatformUtils
 
 __plugin_meta__ = PluginMetadata(
-    name="重启",
-    description="执行脚本重启波奇",
+    name="重启/关机",
+    description="执行脚本重启/关机波奇",
     usage="""
-    重启
+    重启/关机
     """.strip(),
     extra=PluginExtraData(
         author="HibiKier", version="0.1", plugin_type=PluginType.SUPERUSER

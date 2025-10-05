@@ -225,7 +225,10 @@ async def user_handle(module: str, entity: EntityIDs, session: Uninfo) -> None:
         except asyncio.TimeoutError:
             logger.error(f"查询插件信息超时: {module}", LOGGER_COMMAND)
             # 超时时不阻塞，继续执行
-            raise SkipPluginException("用户处于黑名单中...")
+            # raise SkipPluginException("用户处于黑名单中...")
+
+            #超时时不阻塞，继续执行
+            return
 
         if (
             db_plugin

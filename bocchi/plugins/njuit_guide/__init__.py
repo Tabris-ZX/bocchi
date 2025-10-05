@@ -37,7 +37,7 @@ __plugin_meta__ = PluginMetadata(
     指令:
         南工新生: 获取新生指南pdf
         南工地图: 南工院彩绘地图
-        南工官网: 学校官网
+        南工宿舍/宿舍号码:获取宿舍电费充值号码(id)
 
         校果 ?[帖子数=10] ?[评论数=10]: 查询最新n条校果论坛帖子
         校果热榜: 查询校果论坛热榜帖子
@@ -78,8 +78,9 @@ map_matcher = on_alconna(
     priority=5,
     block=True,
 )
-ow_matcher = on_alconna(
-    Alconna("南工官网"),
+dorm_id_matcher = on_alconna(
+    Alconna("南工宿舍"),
+    aliases={"宿舍id","宿舍号码"},
     priority=5,
     block=True,
 )
@@ -158,9 +159,10 @@ async def handle_send_image():
     await MessageUtils.build_message(map_path).send()
 
 
-@ow_matcher.handle()
+@dorm_id_matcher.handle()
 async def handle_send_ow():
-    await MessageUtils.build_message("https://www.niit.edu.cn/").send()
+    dorm_id_path = FILE_PATH/"dorm_id.png"
+    await MessageUtils.build_message(dorm_id_path).send()
 
 
 @bind_matcher.handle()
@@ -204,7 +206,8 @@ async def handle_push_setting(session: Uninfo, action: str):
     # 检查用户是否已绑定宿舍
     user_data = await NjuitStu.get_data(user_id)
     if not user_data or not user_data.dorm_id:
-        await MessageUtils.build_message("先绑定宿舍信息才能开启电费推送哦！\n私聊小波奇发送'账号绑定 宿舍 宿舍id'来绑定宿舍吧~").send(reply_to=True)
+        dorm_id_path = FILE_PATH/"dorm_id.png"
+        await MessageUtils.build_message(["先绑定宿舍信息才能开启电费推送哦！\n私聊小波奇发送\n账号绑定  dorm  宿舍id\n来绑定宿舍吧~",dorm_id_path]).send(reply_to=True)
         return
     
     if action in ["开启", "开", "on"]:
@@ -305,27 +308,3 @@ async def send_daily_electricity_reminder():
         logger.info(f"每日电费提醒发送完成，共发送到 {sent_count} 个群")
     except Exception as e:
         logger.error(f"发送每日电费提醒失败: {e}")
-
-# zx_bind_matcher = on_alconna(
-#     Alconna(
-#         "账号绑定",
-#         Args["user_id", str],
-#         Option("班级", Args["class_name", str, ""]),
-#         Option("宿舍", Args["dorm_id", str, ""]),
-#     ),
-#     permission=SUPERUSER,
-#     priority=5,
-#     block=True,
-# )
-
-# @zx_bind_matcher.handle()
-# async def handle_zx_bind(user_id: str, class_name: str = "", dorm_id: str = ""):
-#     # 如果提供了宿舍ID，先进行验证提示
-#     bind = await ElectricityService.bind_info(
-#         user_id=user_id, class_name=class_name, dorm_id=dorm_id
-#     )
-#     logger.info(f"绑定结果: 用户ID: {user_id}, 班级: {class_name}, 宿舍: {dorm_id}")
-#     if bind:
-#         await MessageUtils.build_message("✅ 绑定成功！").send(reply_to=True)
-#     else:
-#         await MessageUtils.build_message("❌ 绑定失败,肯定不是波奇的问题!").send(reply_to=True)
