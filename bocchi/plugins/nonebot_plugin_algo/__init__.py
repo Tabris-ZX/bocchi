@@ -31,4 +31,6 @@ __plugin_meta__ = PluginMetadata(
 
 # 导入命令与事件处理器，完成注册
 from . import command  # noqa: F401
+# 导入定时任务模块
+from . import scheduler  # noqa: F401
 

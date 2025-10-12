@@ -3,11 +3,12 @@ import os
 from pathlib import Path
 import random
 
+from PIL import Image
 from asyncpg import UniqueViolationError
 from nonebot_plugin_alconna import UniMessage
 
 from bocchi.configs.config import BotConfig, Config
-from bocchi.configs.path_config import DATA_PATH, TEMP_PATH
+from bocchi.configs.path_config import DATA_PATH, TEMP_PATH,IMAGE_PATH
 from bocchi.services.log import logger
 from bocchi.utils._build_image import BuildImage
 from bocchi.utils.http_utils import AsyncHttpx
@@ -16,7 +17,8 @@ from bocchi.utils.utils import change_img_md5, change_pixiv_image_links
 
 from .._model import Setu
 
-IMAGE_PATH = DATA_PATH / "setu"
+SETU_PATH = DATA_PATH / "setu"
+
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6;"
@@ -76,7 +78,7 @@ class SetuManage:
             setu_list = random.sample(data_list, num)
             for setu in setu_list:
                 base_path = None
-                base_path = IMAGE_PATH / "_r18" if setu.is_r18 else IMAGE_PATH / "_setu"
+                base_path = SETU_PATH / "_r18" if setu.is_r18 else SETU_PATH / "_setu"
                 file_path = base_path / f"{setu.local_id}.jpg"
                 if not file_path.exists():
                     return f"本地色图Id: {setu.local_id} 不存在..."
@@ -182,7 +184,7 @@ class SetuManage:
                 return MessageUtils.build_message(
                     [
                         "我为什么要给你发这个？",
-                        IMAGE_PATH
+                        SETU_PATH
                         / "luoxiang"
                         / random.choice(os.listdir(IMAGE_PATH / "luoxiang")),
                         f"\n(快向{BotConfig.self_nickname}签到提升好感度吧！)",
@@ -207,7 +209,7 @@ class SetuManage:
         if setu.local_id:
             """本地图片存在直接返回"""
             file_name = f"{index}.jpg"
-            base_path = IMAGE_PATH / "_r18" if setu.is_r18 else IMAGE_PATH / "_setu"
+            base_path = SETU_PATH / "_r18" if setu.is_r18 else SETU_PATH / "_setu"
             local_file = base_path / file_name
             if local_file.exists():
                 return local_file

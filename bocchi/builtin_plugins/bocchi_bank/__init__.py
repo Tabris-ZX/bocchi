@@ -28,7 +28,7 @@ __plugin_meta__ = PluginMetadata(
         存款 [金额]
         取款 [金额]
         银行信息
-        我的银行信息
+        我的银行
     """.strip(),
     extra=PluginExtraData(
         author="HibiKier",
@@ -111,7 +111,7 @@ _matcher.shortcut(
 )
 
 _matcher.shortcut(
-    r"我的银行信息",
+    r"我的银行",
     command="mahiro-bank",
     arguments=["user-info"],
     prefix=True,

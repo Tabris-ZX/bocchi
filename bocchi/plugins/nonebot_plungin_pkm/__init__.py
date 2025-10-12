@@ -16,7 +16,9 @@ __plugin_meta__ = PluginMetadata(
     description="宝可梦万事屋,支持查询宝可梦/招式/特性/道具信息,融合宝可梦等",
     usage="""
     pkm ?[宝可梦/招式/特性/道具名称] : 查询宝可梦/招式/特性/道具信息
+    pkm 我是谁 : 宝可梦剪影猜谜游戏
     merge ?[宝可梦1] ?[宝可梦2] : 融合宝可梦(不填为随机)
+
     
 
     """,
@@ -39,8 +41,6 @@ pkm_info_matcher = on_alconna(
 async def handle_pkm_info(name: str):
     pass
 
-
-
 pkm_merge_matcher = on_alconna(
     Alconna(
         "merge",
@@ -54,4 +54,15 @@ pkm_merge_matcher = on_alconna(
 @pkm_merge_matcher.handle()
 async def handle_merge_pkm(name1: str, name2: str):
     pkm_merge = PkmMerge(name1, name2)
-    
+
+pkm_guess_matcher = on_alconna(
+    Alconna(
+        "pkm 我是谁",
+    ),
+    priority=5,
+    block=True,
+)
+
+@pkm_guess_matcher.handle()
+async def handle_guess_pkm():
+    pass

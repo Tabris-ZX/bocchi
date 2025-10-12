@@ -20,11 +20,11 @@ __plugin_meta__ = PluginMetadata(
     查看个人/群组信息
     指令：
         我的信息 ?[at] - 查看某人的信息
-        更新/修改信息 [-t/--头衔][str] [-r/--种族][str] [-o/--职业][str] [-d/--简介][str] - 更新某人的信息
+        更新/修改信息 ?头衔[str] 种族[str] 职业[str] 简介[str] - 更新某人的信息
         
     示例：    
-        更新信息 -t abc -r 123
-        修改信息 -d qwertyuiop
+        更新信息 头衔 abc 种族 123
+        修改信息 简介 qwertyuiop
         
     """.strip(),
     extra=PluginExtraData(

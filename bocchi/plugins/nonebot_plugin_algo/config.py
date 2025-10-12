@@ -17,10 +17,9 @@ class AlgoConfig(BaseModel):
     algo_remind_pre: int = 30
     # 排序字段
     algo_order_by: str = "start"
-    # 洛谷cookie(选填,填写后可获取用户关注/动态信息)
+    # 洛谷cookie(选填,填写后可获取用户关注/动态信息,隐私设置用户)
     luogu_cookie: str =""
     luogu_x_csrf_token: str =""
-    luogu_x_requested_with: str =""
     
     # 洛谷难度等级名称映射
     luogu_difficulty_names: dict = {

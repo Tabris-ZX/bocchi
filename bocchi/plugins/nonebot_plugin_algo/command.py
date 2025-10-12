@@ -132,7 +132,7 @@ async def handle_luogu_info(user: str| int):
     """查询指定用户洛谷信息"""
     msg = await Luogu.build_user_info(user)
     if msg is None:
-        await luogu_info.finish("该用户不存在")
+        await luogu_info.finish("该用户不存在或未通过实名认证捏~")
     await luogu_info.send(MessageSegment.image(msg))
 
 @recent_contest.handle()
