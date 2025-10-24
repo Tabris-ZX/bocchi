@@ -21,28 +21,6 @@ class AlgoConfig(BaseModel):
     luogu_cookie: str =""
     luogu_x_csrf_token: str =""
     
-    # 洛谷难度等级名称映射
-    luogu_difficulty_names: dict = {
-        -1: "暂未评级",
-        1: "入门",
-        2: "普及-",
-        3: "普及/提高-",
-        4: "普及+/提高",
-        5: "提高+/省选",
-        6: "省选/NOI-",
-        7: "NOI/NOI+/CTSC",
-    }
-
-    # 洛谷用户名颜色
-    luogu_name_color: dict = {
-        "Gray": "#bbbbbb",
-        "Blue": "#0e90d2",
-        "Green": "#5eb95e",
-        "Orange": "#e67e22",
-        "Red": "#e74c3c",
-        "Purple": "#9d3dcf",
-        "Cheater": "#ad8b00",
-    }
 
     @property
     def default_params(self) -> dict:

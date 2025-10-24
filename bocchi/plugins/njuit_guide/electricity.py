@@ -1,8 +1,11 @@
 import re
 import httpx
 import asyncio
+import smtplib
+import textwrap
 from pathlib import Path
 from typing import Optional
+from email.mime.text import MIMEText
 
 from nonebot import get_bot
 from bocchi import ui
@@ -19,7 +22,7 @@ FILE_PATH = DATA_PATH / "njuit_guide"
 TEMPLATES_PATH = THEMES_PATH / "default" / "templates" /"pages"/"builtin"/ "njuit_guide"
 
 
-class ElectricityService:
+class Electricity:
     """电费相关服务类"""
 
     @classmethod
@@ -210,3 +213,81 @@ class ElectricityService:
         except Exception as e:
             logger.error(f"生成电费图片失败: {e}")
             return None
+    
+    @classmethod
+    async def check_low_balance_and_send_email(cls,threshold=15.0):
+        """检查电费不足用户并发送邮件提醒，返回发送邮件数量"""
+        try:
+            # 获取所有开启推送且有宿舍ID的用户
+            users = await NjuitStu.filter(push=True, dorm_id__isnull=False).all()
+            if not users:
+                logger.info("没有开启推送的用户需要检查电费")
+                return 0
+            
+            sent_count = 0
+            for user in users:
+                try:
+                    # 查询电费余额
+                    balance_info = await Electricity._get_electricity_balance(user.dorm_id)
+                    if balance_info['error'] or balance_info['value'] >= threshold:
+                        continue
+                    
+                    # 发送邮件提醒
+                    subject = f"电费不足提醒"
+                    import textwrap
+                    content = textwrap.dedent(f"""
+                        呜……那、那个……
+                        我刚刚查了一下你的电费余额，好像还剩 {balance_info['balance']}……
+                        要、要注意别花太多了呀(>_<)
+                    """)
+                    
+                    email = f"{user.user_id}@qq.com"
+                    
+                    success = await cls.send_mail(email, content, subject)
+                    if success:
+                        sent_count += 1
+                        logger.info(f"电费不足邮件已发送给用户 {user.user_id}，宿舍 {user.dorm_id}")
+                    
+                except Exception as e:
+                    logger.error(f"处理用户 {user.user_id} 电费检查失败: {e}")
+                    continue
+            
+            logger.info(f"电费不足邮件发送完成，共发送 {sent_count} 封邮件")
+            return sent_count
+            
+        except Exception as e:
+            logger.error(f"检查电费不足并发送邮件失败: {e}")
+            return 0
+
+    @classmethod
+    async def send_mail(cls, to, text, subject="电费不足提醒"):
+        """发送邮件，使用同步方式避免异步问题"""
+        try:
+            msg = MIMEText(text, 'plain', 'utf-8')
+            
+            # 设置邮件头信息，防止被过滤
+            msg['Subject'] = subject
+            msg['From'] = '小波奇电费提醒 <3541219424@qq.com>'
+            msg['To'] = to
+            msg['X-Mailer'] = 'Bocchi Bot v1.0'
+            msg['X-Priority'] = '3'
+            msg['X-MSMail-Priority'] = 'Normal'
+            msg['Importance'] = 'Normal'
+            msg['X-Originating-IP'] = '[127.0.0.1]'
+            msg['Return-Path'] = '3541219424@qq.com'
+            msg['Reply-To'] = '3541219424@qq.com'
+            
+            # 添加邮件内容类型和编码
+            msg['Content-Type'] = 'text/plain; charset=utf-8'
+            msg['Content-Transfer-Encoding'] = '8bit'
+            
+            # 直接同步发送，不使用 run_in_executor
+            with smtplib.SMTP_SSL('smtp.qq.com', 465) as s:
+                s.login('3541219424@qq.com', njuit_config.qq_smtp_code)
+                s.sendmail('3541219424@qq.com', to, msg.as_string())
+            
+            logger.info(f"邮件发送成功: {to}")
+            return True
+        except Exception as e:
+            logger.error(f"邮件发送失败: {to}, 错误: {e}")
+            return False

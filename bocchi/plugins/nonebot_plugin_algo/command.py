@@ -1,17 +1,17 @@
+import sched
 from nonebot import require, get_driver
 require("nonebot_plugin_alconna")
 require("nonebot_plugin_localstore")
 require("nonebot_plugin_apscheduler")
 from nonebot_plugin_alconna import Alconna, Args, Option, on_alconna
 from nonebot_plugin_uninfo import Uninfo
-from nonebot.adapters import Event
-from nonebot.adapters.onebot.v11 import GroupMessageEvent, PrivateMessageEvent, MessageSegment
+from nonebot.adapters.onebot.v11 import GroupMessageEvent, PrivateMessageEvent, MessageSegment,Event
 from nonebot.log import logger
 from .config import algo_config
 from .query import Query
 from .subscribe import Subscribe
 from .luogu import Luogu
-
+from .scheduler import cleanup_luogu_cards
 
 # 查询全部比赛
 recent_contest = on_alconna(
@@ -109,6 +109,13 @@ my_luogu = on_alconna(
     block=True,
 )
 
+clear_luogu_cards = on_alconna(
+    Alconna("清空洛谷卡片"),
+    aliases={"清空洛谷"},
+    priority=5,
+    block=True,
+)
+
 @bind_luogu.handle()
 async def handle_bind_luogu(session:Uninfo,user: str| int):
     """绑定洛谷用户"""
@@ -119,13 +126,20 @@ async def handle_bind_luogu(session:Uninfo,user: str| int):
         await bind_luogu.finish("绑定失败!",reply_to=True)
 
 @my_luogu.handle()
-async def handle_my_luogu(session:Uninfo):
+async def handle_my_luogu(event:Event,session:Uninfo):
     """查询自己的洛谷信息"""
-    user_qq = session.user.id
+    user_qq = session.user.id;
     msg = await Luogu.build_bind_user_info(user_qq)
     if msg is None:
-        await my_luogu.finish("你还未绑定洛谷账号捏~",reply_to=True)
-    await my_luogu.send(MessageSegment.image(msg),reply_to=True)
+        await my_luogu.finish("你还未绑定洛谷账号捏~",reply=True)
+    await my_luogu.finish(MessageSegment.image(msg),reply_to=True)
+
+@clear_luogu_cards.handle()
+async def handle_clear_luogu_cards():
+    """清空洛谷卡片缓存"""
+    await cleanup_luogu_cards()
+    await clear_luogu_cards.finish(f"已清空洛谷卡片缓存！")
+
 
 @luogu_info.handle()
 async def handle_luogu_info(user: str| int):

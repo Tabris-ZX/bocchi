@@ -1,5 +1,6 @@
 from nonebot.plugin import PluginMetadata
 from .config import AlgoConfig
+from bocchi.configs.utils import PluginExtraData
 
 __plugin_meta__ = PluginMetadata(
     name="算法比赛助手",
@@ -26,7 +27,11 @@ __plugin_meta__ = PluginMetadata(
     homepage="https://github.com/Tabris-ZX/nonebot-plugin-algo.git",
     type="application",
     config=AlgoConfig,
-    supported_adapters={"~onebot.v11"}
+    supported_adapters={"~onebot.v11"},
+    extra=PluginExtraData(
+        author="Tabris_ZX",
+        version="0.0.2",
+    ).to_dict(),
 )
 
 # 导入命令与事件处理器，完成注册

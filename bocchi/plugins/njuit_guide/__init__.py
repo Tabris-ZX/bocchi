@@ -9,7 +9,7 @@ from bocchi.utils.enum import GoldHandle
 
 from bocchi.models.user_console import UserConsole
 from .data_source import DataSource
-from .electricity import ElectricityService
+from .electricity import Electricity
 from bocchi.configs.utils import BaseBlock, Command, PluginExtraData
 from bocchi.services.log import logger
 from bocchi.utils.message import MessageUtils
@@ -29,6 +29,10 @@ from bocchi.utils.common_utils import CommonUtils
 from ...utils.platform import broadcast_group
 from .config import njuit_config as conf
 from .model import NjuitStu
+import smtplib
+from email.mime.text import MIMEText
+import asyncio
+
 
 __plugin_meta__ = PluginMetadata(
     name="南工指北",
@@ -178,7 +182,7 @@ async def handle_bind(session: Uninfo, class_name: str = "", dorm_id: str = ""):
         return
 
     # 仅使用 user_id 进行绑定
-    bind = await ElectricityService.bind_info(
+    bind = await Electricity.bind_info(
         user_id=session.user.id, class_name=class_name, dorm_id=dorm_id
     )
     logger.info(
@@ -193,7 +197,7 @@ async def handle_bind(session: Uninfo, class_name: str = "", dorm_id: str = ""):
 
 @query_matcher.handle()
 async def handle_query(session: Uninfo):
-    msg = await ElectricityService.query_balance(session.user.id)
+    msg = await Electricity.query_balance(session.user.id)
     await MessageUtils.build_message(msg).send(reply_to=True)
 
 
@@ -227,30 +231,30 @@ async def handle_push_setting(session: Uninfo, action: str):
 
 
 # 每日定时任务
-async def xg_check(bot: Bot, group_id: str) -> bool:
-    return not await CommonUtils.task_is_block(bot, "today_xiaoguo", group_id)
+# async def xg_check(bot: Bot, group_id: str) -> bool:
+#     return not await CommonUtils.task_is_block(bot, "today_xiaoguo", group_id)
 
-@scheduler.scheduled_job(
-    "cron",
-    hour=12,
-    minute=0,
-)
-async def send_daily_xg():
-    try:
-        img = await DataSource.get_topics(tp_num=conf.topic_num,cmt_num=conf.comment_num,url=conf.xg_latest_url)
-        if img == None:
-            logger.error("图片获取失败")
-            return
-        msg = MessageUtils.build_message(img)
-        await broadcast_group(
-            msg,
-            log_cmd="今日校果",  # 修改日志标识
-            check_func=xg_check,
-        )
-        logger.info("每日校果提醒发送成功")
-    except Exception as e:
-        logger.error(f"发送每日校果提醒失败: {e}")
-
+# @scheduler.scheduled_job(
+#     "cron",
+#     hour=12,
+#     minute=0,
+# )
+# async def send_daily_xg():
+#     try:
+#         img = await DataSource.get_topics(tp_num=conf.topic_num,cmt_num=conf.comment_num,url=conf.xg_latest_url)
+#         if img == None:
+#             logger.error("图片获取失败")
+#             return
+#         msg = MessageUtils.build_message(img)
+#         await broadcast_group(
+#             msg,
+#             log_cmd="今日校果",  # 修改日志标识
+#             check_func=xg_check,
+#         )
+#         logger.info("每日校果提醒发送成功")
+#     except Exception as e:
+#         logger.error(f"发送每日校果提醒失败: {e}")
+   
 async def push_check(bot: Bot, group_id: str) -> bool:
     """检查群组是否应该接收电费推送"""
     # 检查任务是否被阻止
@@ -268,6 +272,7 @@ async def push_check(bot: Bot, group_id: str) -> bool:
         logger.error(f"检查群组 {group_id} 推送权限失败: {e}")
         return False
 
+
 @scheduler.scheduled_job(
     "cron",
     hour=8,
@@ -277,12 +282,19 @@ async def send_daily_electricity_reminder():
     """每天发送电费提醒"""
     try:    
         bot = get_bot()
-        # 获取所有开启推送的用户
+        
+        # 第一步：检查电费不足用户并发送邮件提醒
+        logger.info("开始检查电费不足用户并发送邮件提醒")
+        email_sent_count = await Electricity.check_low_balance_and_send_email(threshold=15.0)
+        logger.info(f"电费不足邮件提醒发送完成，共发送 {email_sent_count} 封邮件")
+        
+        # 第二步：获取所有开启推送的用户
         users = await NjuitStu.filter(push=True).all()
         if not users:
             logger.info("没有用户开启电费推送")
             return
-        # 获取所有群组
+            
+        # 第三步：获取所有群组并发送群组提醒
         groups = await bot.get_group_list()
         sent_count = 0
         
@@ -294,7 +306,7 @@ async def send_daily_electricity_reminder():
                 continue
             
             # 为这个群生成消息
-            message_content = await ElectricityService.get_daily_electricity_reminder_for_group(group_id)
+            message_content = await Electricity.get_daily_electricity_reminder_for_group(group_id)
             if message_content is None:
                 continue
             try:
@@ -305,6 +317,6 @@ async def send_daily_electricity_reminder():
             except Exception as e:
                 logger.error(f"发送电费提醒到群 {group_id} 失败: {e}")
         
-        logger.info(f"每日电费提醒发送完成，共发送到 {sent_count} 个群")
+        logger.info(f"每日电费提醒发送完成，邮件: {email_sent_count} 封，群组: {sent_count} 个")
     except Exception as e:
         logger.error(f"发送每日电费提醒失败: {e}")

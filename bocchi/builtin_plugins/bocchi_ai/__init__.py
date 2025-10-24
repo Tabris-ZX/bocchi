@@ -1,6 +1,7 @@
 import asyncio
 from pathlib import Path
 import random
+from typing import Optional
 
 from httpx import HTTPStatusError
 from nonebot import on_message
@@ -188,6 +189,19 @@ async def rule(event: Event, session: Uninfo) -> bool:
 
 
 _matcher = on_message(priority=998, rule=rule)
+
+
+soul_matcher =  on_alconna(
+    Alconna("人格切换"),
+    permission=SUPERUSER,
+    block=True,
+    priority=1,
+    rule=to_me(),
+)
+@soul_matcher.handle()
+async def _():
+    pass
+
 
 
 _reset_matcher = on_alconna(

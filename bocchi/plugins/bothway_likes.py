@@ -11,7 +11,7 @@ from bocchi.models.sign_user import SignUser
 from bocchi.models.friend_user import FriendUser
 from nonebot_plugin_uninfo import Uninfo
 from bocchi.configs.utils import PluginExtraData
-
+from nonebot.adapters.onebot.v11 import MessageSegment
 __plugin_meta__ = PluginMetadata(
     name="双向点赞",
     description="相互点赞",
@@ -57,10 +57,11 @@ async def send_thank_message(
         # 计算奖励
         add_gold = random.randint(1, 5 * total_likes)
         add_impression = round(random.uniform(0.02*total_likes, 0.2*total_likes), 2)
+        
         if last_group_id:
             # 在群聊中发送消息
             try:
-                message = f"@{operator_nick} 谢谢你的 {total_likes} 个点赞～\n小波奇送给你 {add_gold} 金币\n你和小波奇提升了 {add_impression:.2f} 好感度"
+                message = MessageSegment.at(user_id) + f"谢谢你的 {total_likes} 个点赞～\n小波奇送给你 {add_gold} 金币\n你和小波奇提升了 {add_impression:.2f} 好感度"
                 await bot.send_group_msg(group_id=last_group_id, message=message)
                  # 增加好感度/金币
                 await SignUser.sign(user_id, add_impression, bot.self_id)
@@ -68,6 +69,16 @@ async def send_thank_message(
                 logger.info(f"已在群聊 {last_group_id} 中向用户 {user_id} 发送感谢消息，增加好感度 {add_impression:.2f}，金币 {add_gold}")
             except Exception as e:
                 logger.error(f"发送群聊消息失败: {e}")
+        else:
+            try:
+                message = f"谢谢你的 {total_likes} 个点赞～\n小波奇送给你 {add_gold} 金币\n你和小波奇提升了 {add_impression:.2f} 好感度"
+                await bot.send_private_msg(user_id=int(user_id), message=message)
+                # 增加好感度/金币
+                await SignUser.sign(user_id, add_impression, bot.self_id)
+                await UserConsole.add_gold(user_id, add_gold, "likes")
+                logger.info(f"已向用户 {user_id} 发送私聊感谢消息，增加好感度 {add_impression:.2f}，金币 {add_gold}")
+            except Exception as e:
+                logger.error(f"发送私聊消息失败: {e}")
     except Exception as e:
         logger.error(f"发送感谢消息失败: {e}")
 
@@ -128,28 +139,28 @@ async def timeout_cleanup(bot: Bot, user_id: str, operator_nick: str, last_group
 
 async def get_user_last_active_group(user_id: str) -> str | None:
     """
-    获取用户最后活跃的群聊ID
+    获取用户最后一次发言的群聊ID
     :param user_id: 用户ID
-    :return: 群聊ID，如果没有找到则返回None
+    :return: 群聊ID，如果是群组发言则返回群组ID，如果是私聊或没有发言则返回None
     """
     try:
-        # 查询用户最后一条群聊消息记录
-        last_group_message = (
-            await ChatHistory.filter(
-                user_id=user_id,
-                group_id__not_isnull=True
-            )
+        # 查询用户最后一次发言记录
+        last_message = (
+            await ChatHistory.filter(user_id=user_id)
             .order_by("-create_time")
             .first()
         )
         
-        if last_group_message and last_group_message.group_id:
-            return last_group_message.group_id
+        if last_message and last_message.group_id:
+            # 如果最后一次发言是在群组中
+            logger.info(f"用户 {user_id} 最后一次发言在群组 {last_message.group_id}")
+            return last_message.group_id
         else:
-            logger.info(f"用户 {user_id} 没有群聊记录")
+            # 如果最后一次发言是私聊或没有发言记录
+            logger.info(f"用户 {user_id} 最后一次发言是私聊或没有发言记录")
             return None
     except Exception as e:
-        logger.error(f"查询用户最后活跃群聊失败: {e}")
+        logger.error(f"查询用户最后发言群聊失败: {e}")
         return None
 
 async def dian_likes(bot: Bot, user_id:int):

@@ -50,6 +50,8 @@
       display: flex;
       justify-content: center;
       margin-top: 8px;
+      position: relative;
+      z-index: 2;
     }
 
     .avatar {
@@ -60,15 +62,19 @@
       background: #fff8e1;
       box-shadow: 0 6px 20px rgba(0, 0, 0, .15);
       border: 4px solid rgba(255, 255, 255, .35);
+      z-index: 2;
     }
 
+
     .name-row {
-      margin-top: 12px;
+      margin-top: 2px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 2px;
       flex-wrap: wrap;
+      position: relative;
+      z-index: 2;
     }
 
     .name {
@@ -90,7 +96,7 @@
     }
 
     .sub {
-      margin-top: 6px;
+      margin-top: 0;
       font-size: 14px;
       color: rgba(255, 255, 255, .9);
       max-width: 24em;
@@ -98,7 +104,9 @@
       white-space: normal;
       word-break: break-word;
       overflow-wrap: anywhere;
-      line-height: 1.4;
+      line-height: 1.2;
+      position: relative;
+      z-index: 2;
     }
 
     .levels {
@@ -107,19 +115,39 @@
       gap: 14px;
       justify-content: center;
       flex-wrap: nowrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .levels::after {
+      content: '';
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-100%);
+      width: 560px;
+      height: 200px;
+      /* filter: blur(1px); */
+      background-image: url("{{background}}");
+      /* background-image: url("test_img.jpg"); */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 16px;
+      opacity: 0.8;
+      z-index: -1;
     }
 
     .level {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 7px 12px;
-      background: rgba(38, 113, 212, 0.8);
+      padding: 4px 14px;
+      background: rgba(137, 165, 205, 0.3);
       color: #fff;
-      border-radius: 14px;
+      border-radius: 16px;
       font-weight: 500;
-      font-size: 18px;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25);
+      font-size: 16px;
       width: 160px;
       justify-content: center;
       white-space: nowrap;
@@ -128,18 +156,19 @@
       box-shadow:
         0 6px 12px rgba(0, 0, 0, 0.25),
         inset 0 2px 4px rgba(255, 255, 255, 0.1);
-      /* 内部高光，增加立体感 */
-
     }
 
+
     .panel {
-      margin-top: 22px;
-      width: 92%;
+      margin-top: 18px;
+      width: 95%;
       background: rgba(36, 67, 172, 0.2);
       border-radius: 16px;
       padding: 18px;
       backdrop-filter: blur(1px);
       box-shadow: inset 0 0 0 1px rgba(71, 54, 54, 0.22);
+      position: relative;
+      z-index: 2;
     }
 
     .grid {
@@ -150,39 +179,28 @@
 
     .cell {
       background-color: #2670d2;
-      /* 深蓝底色 */
       border-radius: 14px;
       padding: 12px 20px;
       color: white;
-
-      /* 阴影增强层次感 */
       box-shadow:
         0 6px 12px rgba(0, 0, 0, 0.25),
-        /* 主阴影 */
         inset 0 2px 4px rgba(255, 255, 255, 0.1);
-      /* 内部高光，增加立体感 */
     }
 
-    /* 标签（中文圆润字体） */
     .cell .label {
       font-size: 16px;
       opacity: 0.95;
       font-family: 'Baloo2-SemiBold', 'Noto Sans SC', sans-serif;
       letter-spacing: .2px;
       font-weight: 500;
-
-      /* 文字微阴影让白字更柔和 */
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
     }
 
-    /* 数值部分 */
     .cell .value {
       margin-top: 6px;
       font-size: 22px;
       font-weight: 600;
       font-family: 'Baloo2-SemiBold', 'Noto Sans SC', sans-serif;
-
-      /* 给数字一点柔光阴影，让它更突出 */
       text-shadow:
         0 2px 4px rgba(0, 0, 0, 0.3),
         0 0 4px rgba(255, 255, 255, 0.2);
@@ -268,10 +286,10 @@
     </div>
     <div class="sub">{{slogan}}</div>
     <div class="levels">
-      <!-- <div class="level">📈 Ranking: {{ranking}}</div> -->
       <div class="level">🪪UID: {{uid}}</div>
       <div class="level">⚔️ELO: {{elo}}</div>
     </div>
+
 
     <div class="panel">
       <div class="grid">
@@ -283,14 +301,6 @@
           <div class="label">👥 Followers / Fans</div>
           <div class="value">{{following}} / {{followers}}</div>
         </div>
-        <!-- <div class="cell">
-          <div class="label">📖 提交题目数</div>
-          <div class="value">{{submitted}}</div>
-        </div> -->
-        <!-- <div class="cell">
-          <div class="label">✉️ 邮箱</div>
-          <div class="value">{{email}}</div>
-        </div> -->
         <div class="cell" style="grid-column: 1 / span 2">
           <div class="label">🏅 Prizes</div>
           <div class="value"

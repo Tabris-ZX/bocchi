@@ -81,7 +81,8 @@ async def get_card(
         Path: 卡片路径
     """
     user_id = user.user_id
-    date = datetime.now().date()
+    # 使用上海时区日期，避免服务器本地时区导致当天卡片命名与清理误判
+    date = datetime.now(pytz.timezone("Asia/Shanghai")).date()
     _type = "view" if is_card_view else "sign"
     file_name = f"{user_id}_{_type}_{date}.png"
     card_file = SIGN_TODAY_CARD_PATH / file_name
@@ -134,7 +135,8 @@ def clear_sign_data_pic():
     """
     清空当前签到图片数据
     """
-    date = datetime.now().date()
+    # 使用上海时区日期，确保与签到逻辑一致
+    date = datetime.now(pytz.timezone("Asia/Shanghai")).date()
     for file in os.listdir(SIGN_TODAY_CARD_PATH):
         if str(date) not in file:
             os.remove(SIGN_TODAY_CARD_PATH / file)

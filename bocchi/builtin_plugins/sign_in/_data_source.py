@@ -120,7 +120,9 @@ class SignManage:
             defaults={"user_console": user_console, "platform": platform},
         )
         new_log = (
-            await SignLog.filter(user_id=session.user.id)
+            await SignLog.filter(
+                user_id=session.user.id, platform=platform, bot_id=session.self_id
+            )
             .order_by("-create_time")
             .first()
         )
