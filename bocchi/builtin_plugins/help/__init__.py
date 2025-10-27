@@ -33,9 +33,9 @@ __plugin_meta__ = PluginMetadata(
         configs=[
             RegisterConfig(
                 key="ENABLE_LLM_HELPER",
-                value=False,
+                value=True,
                 help="是否开启LLM智能帮助功能",
-                default_value=False,
+                default_value=True,
                 type=bool,
             ),
             RegisterConfig(

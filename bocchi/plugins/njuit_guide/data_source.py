@@ -13,7 +13,7 @@ from bocchi.configs.path_config import DATA_PATH, THEMES_PATH
 from bocchi.services.log import logger
 
 FILE_PATH = DATA_PATH / "njuit_guide"
-TEMPLATES_PATH = THEMES_PATH / "default" / "templates" /"pages"/"builtin"/ "njuit_guide"
+TEMPLATES_PATH = THEMES_PATH / "default" / "templates" /"pages"/"extra"/ "njuit_guide"
 save_path = FILE_PATH / "xiaoguo.png"
 save_path.parent.mkdir(parents=True, exist_ok=True)
 xg_path = TEMPLATES_PATH / "xg_template.html"
@@ -206,7 +206,7 @@ class DataSource:
                 content_html = "".join(content_parts)
 
                 image_bytes = await ui.render_template(
-                    "pages/builtin/njuit_guide/xg_template.html",
+                    "pages/extra/njuit_guide/xg_template.html",
                     data={"content": content_html},
                     viewport={"width": 386, "height": 10},
                 )

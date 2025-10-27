@@ -15,11 +15,7 @@ __plugin_meta__ = PluginMetadata(
     name="宝可梦万事屋",
     description="宝可梦万事屋,支持查询宝可梦/招式/特性/道具信息,融合宝可梦等",
     usage="""
-    pkm ?[宝可梦/招式/特性/道具名称] : 查询宝可梦/招式/特性/道具信息
-    pkm 我是谁 : 宝可梦剪影猜谜游戏
-    merge ?[宝可梦1] ?[宝可梦2] : 融合宝可梦(不填为随机)
-
-    
+    敬请期待...
 
     """,
     homepage="https://github.com/Tabris-ZX/nonebot-plugin-pkm.git",

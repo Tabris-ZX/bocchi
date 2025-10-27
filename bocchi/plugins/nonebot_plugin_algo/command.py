@@ -3,7 +3,7 @@ from nonebot import require, get_driver
 require("nonebot_plugin_alconna")
 require("nonebot_plugin_localstore")
 require("nonebot_plugin_apscheduler")
-from nonebot_plugin_alconna import Alconna, Args, Option, on_alconna
+from nonebot_plugin_alconna import Alconna, Args, Option, on_alconna, UniMessage
 from nonebot_plugin_uninfo import Uninfo
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, PrivateMessageEvent, MessageSegment,Event
 from nonebot.log import logger
@@ -14,17 +14,15 @@ from .luogu import Luogu
 from .scheduler import cleanup_luogu_cards
 
 # 查询全部比赛
-recent_contest = on_alconna(
-    Alconna("近期比赛"),
-    aliases={"近期"},
-    priority=5,
-    block=True,
-)
+# recent_contest = on_alconna(
+#     Alconna("近期比赛"),
+#     priority=5,
+#     block=True,
+# )
 
 # 查询今日比赛
 query_today_contest = on_alconna(
     Alconna("今日比赛"),
-    aliases={"今日"},
     priority=5,
     block=True,
 )
@@ -32,7 +30,7 @@ query_today_contest = on_alconna(
 # 按条件检索比赛
 query_conditions_contest = on_alconna(
     Alconna(
-        "比赛",
+        "近期比赛",
         Args["resource_id?", int],
         Args["days?", int],
     ),
@@ -42,7 +40,7 @@ query_conditions_contest = on_alconna(
 
 query_conditions_problem = on_alconna(
     Alconna(
-        "题目",
+        "比赛题目",
         Args["contest_ids", int],
     ),
     priority=5,
@@ -131,8 +129,8 @@ async def handle_my_luogu(event:Event,session:Uninfo):
     user_qq = session.user.id;
     msg = await Luogu.build_bind_user_info(user_qq)
     if msg is None:
-        await my_luogu.finish("你还未绑定洛谷账号捏~",reply=True)
-    await my_luogu.finish(MessageSegment.image(msg),reply_to=True)
+        await UniMessage("你还未绑定洛谷账号捏~").finish(reply_to=True)
+    await UniMessage.image(path=msg).finish(reply_to=True)
 
 @clear_luogu_cards.handle()
 async def handle_clear_luogu_cards():
@@ -147,13 +145,13 @@ async def handle_luogu_info(user: str| int):
     msg = await Luogu.build_user_info(user)
     if msg is None:
         await luogu_info.finish("该用户不存在或未通过实名认证捏~")
-    await luogu_info.send(MessageSegment.image(msg))
+    await UniMessage.image(path=msg).finish(reply_to=True)
 
-@recent_contest.handle()
-async def handle_all_matcher():
-    """查询近期比赛"""
-    msg = await Query.ans_recent_contests()
-    await recent_contest.finish(msg)
+# @recent_contest.handle()
+# async def handle_all_matcher():
+#     """查询近期比赛"""
+#     msg = await Query.ans_recent_contests()
+#     await recent_contest.finish(msg)
 
 @query_today_contest.handle()
 async def handle_today_match():

@@ -11,7 +11,7 @@ __plugin_meta__ = PluginMetadata(
     name="请喝杯奶茶吧",
     description="想请作者喝杯奶茶吗,满足你!",
     usage="""
-    请zx喝奶茶/为爱发电/打赏
+    请zx喝奶茶/为爱发电/打赏/vivo50/凉乞钞/请波奇喝奶茶
     """.strip(),
     extra=PluginExtraData(
         author="Tabris_ZX",
@@ -21,7 +21,7 @@ __plugin_meta__ = PluginMetadata(
 
 _contribution_matcher = on_alconna(
     Alconna("为爱发电"),
-    aliases={"请zx喝奶茶","打赏","vivo50","凉乞钞"},
+    aliases={"请zx喝奶茶","打赏","vivo50","凉乞钞","请波奇喝奶茶"},
     priority=5,
     block=True,
 )

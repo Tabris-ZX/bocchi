@@ -252,7 +252,19 @@ async def _(
     session: Uninfo,
     uname: str = UserName(),
 ):
-    if not message.extract_plain_text().strip():
+    #原先的代码,保留备份
+    #if not message.extract_plain_text().strip():
+    # 检查消息是否包含图片或其他内容
+    has_text = message.extract_plain_text().strip()
+    # 检查是否有图片、语音、视频等其他内容
+    has_other_content = bool(message) and len([seg for seg in message if seg.type != "text"]) > 0
+    
+    # 如果是私聊且消息是空的（只有表情等），不回复
+    if not session.group and not has_text and not has_other_content:
+        return
+    
+    # 如果不是私聊，空消息时返回打招呼
+    if not has_text and not has_other_content:
         if event.is_tome():
             await MessageUtils.build_message(ChatManager.hello()).finish()
         return

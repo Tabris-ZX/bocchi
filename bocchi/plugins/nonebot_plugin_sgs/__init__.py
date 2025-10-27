@@ -15,7 +15,8 @@ __plugin_meta__ = PluginMetadata(
     name="三国杀wiki",
     description="三国杀wiki查询助手",
     usage="""
-    
+    sgs ?[武将名称] : 查询武将信息
+    sgs公告 : 查询三国杀wiki公告
     """,
     homepage="https://github.com/Tabris-ZX/nonebot-plugin-sgs.git",
     type="application",

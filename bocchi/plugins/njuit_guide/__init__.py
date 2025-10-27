@@ -38,24 +38,20 @@ __plugin_meta__ = PluginMetadata(
     name="南工指北",
     description="旨在为南工院学生提供一些便捷辅助",
     usage="""
-    指令:
-        南工新生: 获取新生指南pdf
-        南工地图: 南工院彩绘地图
-        南工宿舍/宿舍号码:获取宿舍电费充值号码(id)
-
-        校果 ?[帖子数=10] ?[评论数=10]: 查询最新n条校果论坛帖子
-        校果热榜: 查询校果论坛热榜帖子
-        
-        账号绑定 ?dorm [宿舍号] ?class [班级名]: 绑定qq账户和你的宿舍/班级
-        (建议私聊小波奇绑定以保护隐私) 
-        电费查询: 查询已绑定宿舍的电费余额
-        电费推送 开/关: 开启或关闭每日早上8点电费余额推送
-        
-        如: 校果 5
-            账号绑定 dorm 123456
-            电费推送 开
-    todo:
-        快捷课表查询
+    南工新生: 获取新生指南pdf
+    南工地图: 南工院彩绘地图
+    南工宿舍/宿舍号码:获取宿舍电费充值号码(id)
+    今日校果 ?[帖子数=10] ?[评论数=10]: 查询最新n条校果论坛帖子
+    校果热榜: 查询校果论坛热榜帖子
+    账号绑定 ?dorm [宿舍号] ?class [班级名]: 绑定qq账户和你的宿舍/班级
+    (建议私聊小波奇绑定以保护隐私) 
+    电费查询: 查询已绑定宿舍的电费余额
+    电费推送 开/关: 开启或关闭每日早上8点电费余额推送
+    
+    示例: 
+    今日校果 5
+    账号绑定 dorm 123456
+    电费推送 开
 
     还要做什么功能可以和作者提建议...
     """.strip(),
@@ -116,7 +112,7 @@ push_matcher = on_alconna(
 
 xg_latest_matcher = on_alconna(
     Alconna(
-        "校果",
+        "今日校果",
         Args["tp_num?", int, conf.topic_num],
         Args["cmt_num?", int, conf.comment_num],
     ),
@@ -172,9 +168,6 @@ async def handle_send_ow():
 @bind_matcher.handle()
 async def handle_bind(session: Uninfo, class_name: str = "", dorm_id: str = ""):
     # 检查是否提供了必要的参数
-    user = await UserConsole.get_user(session.user.id)
-    if user.gold < 100:
-        await MessageUtils.build_message("金币不足！").finish()
     if not class_name and not dorm_id:
         await MessageUtils.build_message(
             "请提供班级或宿舍信息！\n使用教程:请发送'波奇帮助91'"
@@ -189,7 +182,6 @@ async def handle_bind(session: Uninfo, class_name: str = "", dorm_id: str = ""):
         f"绑定结果: 用户ID: {session.user.id}, 班级: {class_name}, 宿舍: {dorm_id}"
     )
     if bind:
-        await UserConsole.reduce_gold(user.user_id, 91, GoldHandle.BUY, "niit_guide")
         await MessageUtils.build_message("✅ 绑定成功！(电费推送默认开启)").send(reply_to=True)
     else:
         await MessageUtils.build_message("❌ 绑定失败,肯定不是波奇的问题!").send(reply_to=True)

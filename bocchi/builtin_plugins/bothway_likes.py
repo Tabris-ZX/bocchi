@@ -12,6 +12,7 @@ from bocchi.models.friend_user import FriendUser
 from nonebot_plugin_uninfo import Uninfo
 from bocchi.configs.utils import PluginExtraData
 from nonebot.adapters.onebot.v11 import MessageSegment
+from decimal import Decimal
 __plugin_meta__ = PluginMetadata(
     name="双向点赞",
     description="相互点赞",
@@ -63,8 +64,10 @@ async def send_thank_message(
             try:
                 message = MessageSegment.at(user_id) + f"谢谢你的 {total_likes} 个点赞～\n小波奇送给你 {add_gold} 金币\n你和小波奇提升了 {add_impression:.2f} 好感度"
                 await bot.send_group_msg(group_id=last_group_id, message=message)
-                 # 增加好感度/金币
-                await SignUser.sign(user_id, add_impression, bot.self_id)
+                # 增加好感度/金币
+                sign_user = await SignUser.get_user(user_id=user_id)
+                sign_user.impression = sign_user.impression + Decimal(str(add_impression))
+                await sign_user.save()
                 await UserConsole.add_gold(user_id, add_gold, "likes")
                 logger.info(f"已在群聊 {last_group_id} 中向用户 {user_id} 发送感谢消息，增加好感度 {add_impression:.2f}，金币 {add_gold}")
             except Exception as e:
@@ -74,7 +77,9 @@ async def send_thank_message(
                 message = f"谢谢你的 {total_likes} 个点赞～\n小波奇送给你 {add_gold} 金币\n你和小波奇提升了 {add_impression:.2f} 好感度"
                 await bot.send_private_msg(user_id=int(user_id), message=message)
                 # 增加好感度/金币
-                await SignUser.sign(user_id, add_impression, bot.self_id)
+                sign_user = await SignUser.get_user(user_id=user_id)
+                sign_user.impression = sign_user.impression + Decimal(str(add_impression))
+                await sign_user.save()
                 await UserConsole.add_gold(user_id, add_gold, "likes")
                 logger.info(f"已向用户 {user_id} 发送私聊感谢消息，增加好感度 {add_impression:.2f}，金币 {add_gold}")
             except Exception as e:
@@ -193,13 +198,13 @@ async def _(bot: Bot, session: Uninfo):
     # 检查是否为好友关系
     friend_user = await FriendUser.get_or_none(user_id=user_id)
     if not friend_user:
-        await likes.finish("抱歉，只有小波奇的好友才能使用点赞功能哦~")
+        await likes.finish("那个...小波奇只敢给好友点赞啦...Σ( ° △ °|||)︴")
     
     count = await dian_likes(bot, int(session.user.id))
     if count != 0:
-        await likes.send(f"已经给你点了{count}个赞!\n小波奇希望你也能给她点赞~")
+        await likes.send(f"已经给你点了{count}个赞!\n >///<小波奇希望你也能给她点赞哦~")
     else:
-        await likes.finish(f"我给不了你更多了啦~")
+        await likes.finish(f"今天给你点过了哦...不要太贪心了啊...(*￣︶￣)σ")
 
 def is_profile_like(event: Event) -> bool:
     return getattr(event, "notice_type") == "notify" and getattr(event, "sub_type") == "profile_like"

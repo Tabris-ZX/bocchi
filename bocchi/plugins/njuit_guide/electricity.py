@@ -19,7 +19,7 @@ from .model import NjuitStu
 
 
 FILE_PATH = DATA_PATH / "njuit_guide"
-TEMPLATES_PATH = THEMES_PATH / "default" / "templates" /"pages"/"builtin"/ "njuit_guide"
+TEMPLATES_PATH = THEMES_PATH / "default" / "templates" /"pages"/"extra"/ "njuit_guide"
 
 
 class Electricity:
@@ -199,7 +199,7 @@ class Electricity:
             content_html = "".join(cls._generate_user_html(user) for user in user_data)
             # 使用UI统一渲染
             image_bytes = await ui.render_template(
-                "pages/builtin/njuit_guide/electricity_template.html",
+                "pages/extra/njuit_guide/electricity_template.html",
                 data={"content": content_html},
                 viewport={"width": 400, "height": 10},
             )
