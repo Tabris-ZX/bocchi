@@ -123,10 +123,10 @@
     .levels::after {
       content: '';
       position: absolute;
-      top: calc(100% + 15px);
-      left: 50%;
+      top: calc(100% + 20px);
+      left: 45%;
       transform: translateX(-50%) translateY(-100%);
-      width: 1030px;
+      width: 1040px;
       height: 250px;
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(240, 248, 255, 0.2));
       backdrop-filter: blur(10px);
@@ -473,7 +473,7 @@
             <div class="bar">
               <div class="tag">{{ b.label }}</div>
               <div class="track" style="width: 450px;">
-                <div class="fill" style="--w: {{ [((b.value)|float)**0.5 / 24 * 100, 100]|min }}%; --c: {{ b.color }};"></div>
+                <div class="fill" style="--w: {{ [((b.value)|float)**0.5 / 20 * 100, 100]|min }}%; --c: {{ b.color }};"></div>
               </div>
               <div class="value">{{ b.value }}</div>
             </div>
@@ -490,15 +490,21 @@
               <div class="value">{{passed}}</div>
             </div>
             <div class="cell">
+              <div class="label">💎 PASSED QUALITY(test...)
+              </div>
+              <div class="value">{{quality}}</div>
+            </div>
+            <div class="cell">
               <div class="label">⚔️ RATING
               </div>
               <div class="value">{{elo}}</div>
             </div>
+            
             <div class="cell">
               <div class="label">👥 Following/Followers</div>
               <div class="value">{{following}} / {{followers}}</div>
             </div>
-            <div class="cell">
+            <div class="cell" style="min-height: 120px;">
               <div class="label">🏅 Prizes</div>
               <div class="value"
                 style="font-size:16px; font-weight:500; line-height:1.5; white-space:normal; word-break:break-word;">

@@ -26,12 +26,8 @@ from bocchi.configs.utils import PluginExtraData, Task
 from bocchi.services.log import logger
 from .data_source import DataSource
 from bocchi.utils.common_utils import CommonUtils
-from ...utils.platform import broadcast_group
 from .config import njuit_config as conf
 from .model import NjuitStu
-import smtplib
-from email.mime.text import MIMEText
-import asyncio
 
 
 __plugin_meta__ = PluginMetadata(

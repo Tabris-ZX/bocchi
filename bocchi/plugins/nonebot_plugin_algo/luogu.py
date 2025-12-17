@@ -8,8 +8,9 @@ from pathlib import Path
 from collections import Counter
 import html
 from datetime import datetime
+import math
 from .mapper import Mapper
-TEMPLATE_PATH = Path(__file__).parent / "resources" / "test.html"
+TEMPLATE_PATH = Path(__file__).parent / "resources" / "luogu_card_full.html"
 cards_save_path = luogu_save_path / "cards"
 users_save_path = luogu_save_path / "users.json"
 
@@ -18,13 +19,9 @@ DEFAULT_HEIGHT = 950
 
 class Luogu:
     headers = {
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0",
+            "user-agent": "",
             "X-Lentille-Request": "content-only",    
             "x-requested-with": "XMLHttpRequest",
-            # "cookie":algo_config.luogu_cookie,
-            # "x-csrf-token": algo_config.luogu_x_csrf_token,
         }
     base_url = "https://www.luogu.com.cn"
 
@@ -261,30 +258,33 @@ class Luogu:
         daily_counts = all_info.get("dailyCounts", {}) or {}
         heatmap_rows, weekday_labels, month_labels = cls._build_heatmap(daily_counts)
 
-        
-
-
-
+        # 计算 quality
+        def solve_weights(diff, cnt):
+            return (math.pow(2, diff-1) + math.log2(math.pow(cnt, diff/ 6) + 1)) * cnt
+            
+        quality = 0.00
         # 做题情况部分
         passed_problems_info=all_info.get("passed",{})
         passed_difficulty_counter = Counter(p.get("difficulty") for p in passed_problems_info)
-        levels = [1, 2, 3, 4, 5, 6, 7, -1]
-        # 颜色映射：1-7 依次 红、橙、黄、绿、蓝、紫、黑；-1 灰
+        levels = [1, 2, 3, 4, 5, 6, 7, 0]
+        # 颜色映射：1-7 依次 红、橙、黄、绿、蓝、紫、黑； 灰色为未评级
         level_to_color = Mapper.luogu_problem_level_color
         counts = [int(passed_difficulty_counter.get(l, 0)) for l in levels]
         max_count = max(counts) if any(counts) else 1
         bars = []
         names_map = Mapper.luogu_difficulty_names or {}
         for idx, l in enumerate(levels):
-            c = counts[idx]
-            width = 0 if c == 0 else int(12 + (c / max_count) * 68)
+            cnt = counts[idx]
+            width = 0 if cnt == 0 else int(12 + (cnt / max_count) * 68)
             bars.append({
                 "label": names_map.get(l),
-                "value": c,
+                "value": cnt,
                 "width": width,
                 "color": level_to_color[idx],
             })
-    
+            if cnt > 0 and l > 0:
+                quality += solve_weights(l, cnt)
+        quality/=(passed_problem_count-counts[7]) # 未评级不计入质量
 
         return {
             "name": name,
@@ -305,8 +305,10 @@ class Luogu:
             "heatmap_rows": heatmap_rows,
             "weekday_labels": weekday_labels,
             "month_labels": month_labels,
+            "quality": round(quality*10,2)
         }
 
+    
     @staticmethod
     def _build_heatmap(daily_counts: Dict[str, list]) -> tuple[list[list[int]], list[str], list[str]]:
         """将 daily_counts 构造成 7 行（周日到周六）、N 列的强度矩阵，强度等级 0-6。

@@ -2,11 +2,10 @@ import re
 import httpx
 import asyncio
 import smtplib
-import textwrap
 from pathlib import Path
 from typing import Optional
 from email.mime.text import MIMEText
-
+from email.utils import formataddr
 from nonebot import get_bot
 from bocchi import ui
 
@@ -243,7 +242,7 @@ class Electricity:
                     
                     email = f"{user.user_id}@qq.com"
                     
-                    success = await cls.send_mail(email, content, subject)
+                    success = cls.send_mail(email, content)
                     if success:
                         sent_count += 1
                         logger.info(f"电费不足邮件已发送给用户 {user.user_id}，宿舍 {user.dorm_id}")
@@ -260,34 +259,30 @@ class Electricity:
             return 0
 
     @classmethod
-    async def send_mail(cls, to, text, subject="电费不足提醒"):
-        """发送邮件，使用同步方式避免异步问题"""
+    def send_mail(cls,to, text, subject="你的电费好像不太够了啊..."):
+        """发送邮件（同步方式，忽略 QQ SMTP 伪错误）"""
+        sender_email = '3541219424@qq.com'
+
+        msg = MIMEText(text, 'plain', 'utf-8')
+        msg['Subject'] = subject
+        msg['From'] = formataddr(('可爱的小波奇', sender_email))
+        msg['To'] = to
+
         try:
-            msg = MIMEText(text, 'plain', 'utf-8')
-            
-            # 设置邮件头信息，防止被过滤
-            msg['Subject'] = subject
-            msg['From'] = '小波奇电费提醒 <3541219424@qq.com>'
-            msg['To'] = to
-            msg['X-Mailer'] = 'Bocchi Bot v1.0'
-            msg['X-Priority'] = '3'
-            msg['X-MSMail-Priority'] = 'Normal'
-            msg['Importance'] = 'Normal'
-            msg['X-Originating-IP'] = '[127.0.0.1]'
-            msg['Return-Path'] = '3541219424@qq.com'
-            msg['Reply-To'] = '3541219424@qq.com'
-            
-            # 添加邮件内容类型和编码
-            msg['Content-Type'] = 'text/plain; charset=utf-8'
-            msg['Content-Transfer-Encoding'] = '8bit'
-            
-            # 直接同步发送，不使用 run_in_executor
-            with smtplib.SMTP_SSL('smtp.qq.com', 465) as s:
-                s.login('3541219424@qq.com', njuit_config.qq_smtp_code)
-                s.sendmail('3541219424@qq.com', to, msg.as_string())
-            
-            logger.info(f"邮件发送成功: {to}")
+            with smtplib.SMTP_SSL('smtp.qq.com', 465, timeout=10) as s:
+                s.login(sender_email, "qkznleckjvhtchce")
+                s.sendmail(sender_email, to, msg.as_string())
+            print(f"✅ 邮件发送成功: {to}")
             return True
+
+        except smtplib.SMTPResponseException as e:
+            if e.smtp_code == -1 and e.smtp_error == b'\x00\x00\x00':
+                print(f"✅ 邮件发送成功: {to}")
+                return True
+            else:
+                print(f"❌ 邮件发送失败: {to}, 错误: {e}")
+                return False
+
         except Exception as e:
-            logger.error(f"邮件发送失败: {to}, 错误: {e}")
+            print(f"❌ 邮件发送失败: {to}, 错误: {e}")
             return False

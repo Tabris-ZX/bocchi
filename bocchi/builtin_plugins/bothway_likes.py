@@ -62,7 +62,7 @@ async def send_thank_message(
         if last_group_id:
             # 在群聊中发送消息
             try:
-                message = MessageSegment.at(user_id) + f"谢谢你的 {total_likes} 个点赞～\n小波奇送给你 {add_gold} 金币\n你和小波奇提升了 {add_impression:.2f} 好感度"
+                message = MessageSegment.at(user_id) + f"谢谢你的 {total_likes} 个点赞～\n>///<小波奇送给你 {add_gold} 金币\n你和小波奇提升了 {add_impression:.2f} 好感度了呢"
                 await bot.send_group_msg(group_id=last_group_id, message=message)
                 # 增加好感度/金币
                 sign_user = await SignUser.get_user(user_id=user_id)
@@ -74,7 +74,7 @@ async def send_thank_message(
                 logger.error(f"发送群聊消息失败: {e}")
         else:
             try:
-                message = f"谢谢你的 {total_likes} 个点赞～\n小波奇送给你 {add_gold} 金币\n你和小波奇提升了 {add_impression:.2f} 好感度"
+                message = f"谢谢你的 {total_likes} 个点赞～\n小波奇送给你 {add_gold} 金币\n你和小波奇提升了 {add_impression:.2f} 好感度了呢"
                 await bot.send_private_msg(user_id=int(user_id), message=message)
                 # 增加好感度/金币
                 sign_user = await SignUser.get_user(user_id=user_id)
@@ -103,7 +103,7 @@ async def check_and_respond_likes(bot: Bot, user_id: str, operator_nick: str, la
         total_likes = user_data["likes"]
         
         # 只有点赞数达到10个时才发送消息并停止跟踪
-        if total_likes >= 10:
+        if total_likes >= 50:
             # 从等待列表中移除
             del waiting_users[user_id]
             await send_thank_message(bot, user_id, operator_nick, total_likes, last_group_id)
