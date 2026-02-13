@@ -244,8 +244,3 @@ async def handle_profile_like(bot: Bot, event: Event):
                         
     except Exception as e:
         logger.error(f"处理点赞事件失败: {e}")
-
-
-
-
-

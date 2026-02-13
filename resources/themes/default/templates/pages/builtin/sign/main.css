@@ -64,13 +64,13 @@ body {
     left: 30px;
 }
 
-.zx-img {
+/* .zx-img {
     height:238px;
     width: 120px;
     left: 306px;
     position: absolute;
     z-index: 999;
-}
+} */
 
 .text-day {
     font-size: 30px;
@@ -220,14 +220,6 @@ body {
     position: absolute;
     top: 37px;
     left: 371px;
-}
-
-.mbl-img {
-    width: 132px;
-    height: 164px;
-    position: absolute;
-    top: 145px;
-    left: 333px;
 }
 
 .wd{
