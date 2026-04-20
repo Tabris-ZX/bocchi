@@ -51,13 +51,16 @@ redis = { version = ">=5", optional = true }
 alibabacloud-devops20210625 = "^5.0.2"
 nonebot-plugin-imageutils = "^0.1.17"
 nonebot-plugin-matchreminder = "^1.0.4"
-nonebot-plugin-memes = "^0.8.1"
 jwt = "^1.4.0"
 curl-cffi = "^0.13.0"
 asyncpg = "^0.30.0"
 tqdm = "^4.67.1"
 bilibili-api-python = "^17.4.1"
 yt-dlp = "^2026.2.4"
+nonebot-plugin-localstore = "^0.7.4"
+nonebot-plugin-orm = "^0.8.3"
+meme-generator = "^0.2.3"
+filetype = "^1.2.0"
 
 [tool.poetry.group.dev.dependencies]
 nonebug = "^0.4"
@@ -79,7 +82,7 @@ plugins = [
     "nonebot_plugin_session",
     "nonebot_plugin_htmlrender",
     "nonebot_plugin_alconna",
-    "nonebot_plugin_memes",
+    "nonebot_plugin_localstore"
 ]
 plugin_dirs = ["bocchi/services", "bocchi/builtin_plugins", "bocchi/plugins"]
 adapters = [

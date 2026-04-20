@@ -100,6 +100,7 @@ class Luogu:
     @classmethod
     def check_card_exists(cls, user: str) -> Path | None:
         """检查洛谷卡片是否存在"""
+        cards_save_path.parent.mkdir(parents=True, exist_ok=True)
         img_path = cards_save_path / f"{user}.png"
         if img_path.exists():
             return img_path

@@ -369,6 +369,7 @@ class CallApi:
             "阿里云百炼": "https://dashscope.aliyuncs.com/compatible-mode/v1",
             "百度智能云": "https://qianfan.baidubce.com/v2",
             "字节火山引擎": "https://ark.cn-beijing.volces.com/api/v3",
+            "d2t4": "https://cpa.kkk1eran.top",
         }
         # 对话
         chat_url = base_config.get("BYM_AI_CHAT_URL") or ""
