@@ -61,6 +61,7 @@ nonebot-plugin-localstore = "^0.7.4"
 nonebot-plugin-orm = "^0.8.3"
 meme-generator = "^0.2.3"
 filetype = "^1.2.0"
+zai-sdk = "^0.2.2"
 
 [tool.poetry.group.dev.dependencies]
 nonebug = "^0.4"

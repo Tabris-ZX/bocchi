@@ -9,6 +9,7 @@ services:
       - ./napcat-config:/app/config
       - /home/zx/.cache:/home/zx/.cache
       - /home/zx/.local/share/nonebot2:/home/zx/.local/share/nonebot2
+      - /home/zx/work/bot:/home/zx/work/bot
     ports:
       - "6100:6099"
     extra_hosts:

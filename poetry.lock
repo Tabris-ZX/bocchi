@@ -1024,6 +1024,22 @@ url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 reference = "aliyun"
 
 [[package]]
+name = "cachetools"
+version = "7.0.6"
+description = "Extensible memoizing collections and decorators"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "cachetools-7.0.6-py3-none-any.whl", hash = "sha256:4e94956cfdd3086f12042cdd29318f5ced3893014f7d0d059bf3ead3f85b7f8b"},
+    {file = "cachetools-7.0.6.tar.gz", hash = "sha256:e5d524d36d65703a87243a26ff08ad84f73352adbeafb1cde81e207b456aaf24"},
+]
+
+[package.source]
+type = "legacy"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+reference = "aliyun"
+
+[[package]]
 name = "cashews"
 version = "7.5.0"
 description = "cache tools with async power"
@@ -7063,6 +7079,30 @@ url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 reference = "aliyun"
 
 [[package]]
+name = "zai-sdk"
+version = "0.2.2"
+description = "A SDK library for accessing big model apis from Z.ai"
+optional = false
+python-versions = ">=3.8, !=2.7.*, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*, !=3.7.*"
+files = [
+    {file = "zai_sdk-0.2.2-py3-none-any.whl", hash = "sha256:675e9ff3fc2a86e38631331469b935589ae60492127f2c2822c7555214f2dd25"},
+    {file = "zai_sdk-0.2.2.tar.gz", hash = "sha256:841af188586c41f0f98abcad17b162dc97461c3ab8b3d09f93b0333ebdfe72c3"},
+]
+
+[package.dependencies]
+cachetools = ">=4.2.2"
+httpx = ">=0.23.0"
+pydantic = ">=1.9.0,<3.0"
+pydantic-core = ">=2.14.6"
+pyjwt = ">=2.9.0,<3.0.0"
+sniffio = ">=1.3.1"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+reference = "aliyun"
+
+[[package]]
 name = "zipp"
 version = "3.23.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -7093,4 +7133,4 @@ redis = ["redis"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "cd7bc2f75e28176d5f9ddf2064503d2d63d0fd91adea5196d847b1e367398178"
+content-hash = "dbefa15ff7966c1981b04839530336e9614e60d32e85b46d066e4eeeba6acd7e"
