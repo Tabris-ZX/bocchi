@@ -16,7 +16,7 @@ from zai import ZhipuAiClient as ZhipuAI
 
 from bocchi.utils.platform import PlatformUtils
 
-from ..config import ChatConfig
+from ..config import ChatConfig, nicknames
 
 
 def get_request_id() -> str:
@@ -36,7 +36,7 @@ async def msg2str(
     res = None
     for segment in msg:
         if isinstance(segment, At):
-            message += f"<AT user={segment.target}> "
+            message += "nickname "
         elif isinstance(segment, Image):
             assert segment.url is not None
             img_url = segment.url.replace("https://", "http://")
@@ -49,6 +49,27 @@ async def msg2str(
         else:
             message += str(segment).replace("[reply]", "\n")
     return message, res
+
+
+def normalize_trigger_nickname(message: str) -> str:
+    """将触发用的昵称统一替换为 nickname，占位后再交给模型理解。"""
+    stripped = message.lstrip()
+    if not stripped:
+        return message
+
+    leading_ws = message[: len(message) - len(stripped)]
+    for nickname in sorted(nicknames, key=len, reverse=True):
+        if not stripped.startswith(nickname):
+            continue
+
+        rest = stripped[len(nickname) :]
+        if not rest:
+            return f"{leading_ws}nickname"
+        if rest[0].isspace() or rest[0] in ",，.。:：!！?？;；~～":
+            return f"{leading_ws}nickname{rest}"
+        return f"{leading_ws}nickname，{rest}"
+
+    return message
 
 
 # def str2msg(message: str) -> list[Text]:

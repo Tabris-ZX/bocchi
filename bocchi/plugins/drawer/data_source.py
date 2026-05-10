@@ -14,21 +14,38 @@ async def build_img(img: bytes | None, prompt: str) -> bytes | int:
     return await _build_image(img, prompt, "drawer")
 
 
-def prepare_edit_image(img: bytes, max_size: int = 1280) -> bytes:
+def _get_edit_image_upload_meta(img: bytes) -> tuple[str, str, str]:
+    try:
+        with Image.open(io.BytesIO(img)) as image:
+            if (image.format or "").upper() == "JPEG":
+                return "JPEG", "image.jpg", "image/jpeg"
+    except Exception:
+        pass
+    return "PNG", "image.png", "image/png"
+
+
+def prepare_edit_image(img: bytes, max_size: int = 1280) -> tuple[bytes, str, str]:
+    image_format, filename, mime_type = _get_edit_image_upload_meta(img)
     try:
         with Image.open(io.BytesIO(img)) as image:
             image = ImageOps.exif_transpose(image)
             image.thumbnail((max_size, max_size))
 
-            if image.mode not in {"RGBA", "LA", "L"}:
+            if image_format == "JPEG":
+                if image.mode not in {"RGB", "L"}:
+                    image = image.convert("RGB")
+            elif image.mode not in {"RGBA", "LA", "L"}:
                 image = image.convert("RGBA")
 
             output = io.BytesIO()
-            image.save(output, format="PNG", optimize=True)
-            return output.getvalue()
+            save_kwargs = {"format": image_format, "optimize": True}
+            if image_format == "JPEG":
+                save_kwargs["quality"] = 95
+            image.save(output, **save_kwargs)
+            return output.getvalue(), filename, mime_type
     except Exception as e:
         logger.warning(f"编辑图片预处理失败，使用原图: {e}", "drawer", e=e)
-        return img
+        return img, filename, mime_type
 
 
 async def _decode_image(payload: dict, log_name: str) -> bytes | None:
@@ -89,20 +106,20 @@ async def _build_image(
     try:
         start_time = time.perf_counter()
         if img is not None:
-            prepared_img = prepare_edit_image(img)
+            prepared_img, filename, mime_type = prepare_edit_image(img)
             response = await get_client().post(
                 url,
                 headers=headers,
                 data=payload,
-                files={"image": ("image.png", prepared_img, "image/png")},
-                timeout=300.0,
+                files={"image": (filename, prepared_img, mime_type)},
+                timeout=360.0,
             )
         else:
             response = await get_client().post(
                 url,
                 headers=headers,
                 json=payload,
-                timeout=300.0,
+                timeout=360.0,
             )
 
         elapsed = time.perf_counter() - start_time

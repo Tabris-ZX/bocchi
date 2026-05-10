@@ -27,6 +27,7 @@ from .utils import (
     get_username,
     get_username_by_session,
     msg2str,
+    normalize_trigger_nickname,
 )
 
 # ==== 简单的内存缓存，用于减少 normal_chat 频繁扫数据库 ====
@@ -220,6 +221,7 @@ class ChatManager:
 
         username = get_username_by_session(session)
         message, img_url = await msg2str(msg, bool(ChatConfig.get("IS_MULTIMODAL")))
+        message = normalize_trigger_nickname(message)
         word_limit = ChatConfig.get("WORD_LIMIT")
         if len(message) > word_limit:
             logger.warning(
